@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agora Francia – Paiement</title>
+  <link rel="stylesheet" href="styles/prime.css">
+</head>
+
+<body>
+  <div id="wrapper">
+
+    <!-- Logo -->
+    <header>
+      <h1 class="logo">
+        <img src="images/logo_agora.png" alt="Logo Agora Francia" width="200">
+      </h1>
+    </header>
+
+    <!-- Navigation -->
+    <nav id="navigation">
+      <a href="index.html"><button>Accueil</button></a>
+      <a href="toutparcourir.html"><button>Tout Parcourir</button></a>
+      <a href="notifications.html"><button>Notifications</button></a>
+      <a href="panier.html"><button>Panier</button></a>
+      <a href="votrecompte.html"><button>Votre compte</button></a>
+    </nav>
+
+    <!-- Section paiement -->
+    <main>
+      <h2>Finaliser votre commande</h2>
+      <form class="paiement-form">
+        <label>Nom complet :
+          <input type="text" placeholder="Votre nom" required>
+        </label>
+
+        <label>Adresse de livraison :
+          <input type="text" placeholder="12 rue des Fleurs, Paris" required>
+        </label>
+
+        <label>Numéro de carte (simulation) :
+          <input type="text" placeholder="XXXX-XXXX-XXXX-XXXX" required>
+        </label>
+
+        <label>Date d'expiration :
+          <input type="month" required>
+        </label>
+
+        <label>Code de sécurité :
+          <input type="text" placeholder="CVV" required>
+        </label>
+
+        <button type="submit">Valider le paiement</button>
+      </form>
+
+      <p style="margin-top:20px;">* Simulation sans transaction réelle.</p>
+    </main>
+
+    <footer id="footer">
+      <p>&copy; 2025 Agora Francia – <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
+    </footer>
+  </div>
+</body>
+
+</html>

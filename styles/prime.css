@@ -1,0 +1,220 @@
+body { 
+    background-color: #ffffff;
+}
+
+#wrapper{
+    width: 640px;
+    margin: 0 auto;
+    min-width: 640px;
+    background-color: #ffffff;
+    color : #089cfc;
+    padding: 20px;
+    border: solid 4px #089cfc;
+    border-radius: 10px;
+}
+
+#navigation {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: auto;
+    float: none;
+    justify-content: center;
+    align-items: center;
+}
+
+#section {
+    margin-left: 150px;
+    padding-right: 20px;
+    padding-bottom: 20px;
+}
+
+.logo { 
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#footer { font-size: .60em;
+    font-style: italic;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-icone {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+#wrapper {
+    border: 3px solid #0094ff;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+#navigation button {
+    background-color: #0094ff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    margin: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.categories {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.categorie img {
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+footer {
+    margin-top: 40px;
+    font-size: 0.9em;
+    color: #333;
+}
+.notifications {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.notif {
+    background-color: #d6f0ff;
+    color: #003b5c;
+    padding: 15px 25px;
+    border-left: 5px solid #0094ff;
+    border-radius: 8px;
+    width: 60%;
+    text-align: left;
+    font-weight: 500;
+}
+
+.historique {
+    margin-top: 30px;
+}
+
+.historique ul {
+    list-style-type: none;
+    padding: 0;
+    font-size: 1em;
+    color: #222;
+}
+
+.historique li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+.notif-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.notif-actions button {
+    background-color: #0094ff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.notif-actions .supprimer {
+    background-color: #ff4d4d;
+}
+table.panier {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table.panier th, table.panier td {
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+table.panier th {
+    background-color: #0094ff;
+    color: white;
+}
+
+.total-panier {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.total-panier button {
+    background-color: #0094ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1em;
+}
+.profil {
+  text-align: left;
+  margin: 30px auto;
+  width: 60%;
+  background-color: #eef6ff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.modifier-btn {
+  margin-top: 15px;
+  background-color: #0094ff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.paiement-form {
+  width: 60%;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.paiement-form label {
+  font-weight: bold;
+  text-align: left;
+}
+
+.paiement-form input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.paiement-form button {
+  background-color: #0094ff;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+}
