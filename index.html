@@ -4,7 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="styles/prime.css" rel="stylesheet" type="text/css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="acceuil.js"></script>
+    <link rel="stylesheet" href="styles/prime.css">
     <title>Agora Francia – Accueil</title>
 </head>
 
@@ -30,13 +32,38 @@
         <!-- Section principale -->
         <main id="section">
             <h2>Sélection du jour</h2>
-            <img src="images/selectiondujour.png" alt="Sélection du jour" width="400" height="400">
+            <div id="carrousel">
+                <img src="images/alpine.jpg"/>
+                <img src="images/ferrari.jpg"/>
+                <img src="images/koenigsegg.jpg"/>
+                <img src="images/lambo.jpg"/>
+                <img src="images/porsche.jpg"/>
+                <div class="controls">
+                    <button class="prev">&#8592;</button>
+                    <button class="next">&#8594;</button>
+                </div>
+            </div>
         </main>
 
         <!-- Pied de page -->
         <footer id="footer">
-            <p>Copyright &copy; 2025 Agora Francia</p>
-            <p><a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
+            <div class="footer-container">
+                <div class="footer-left">
+                    <h3>Contact</h3>
+                    <p>Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
+                    <p>Téléphone : 01 23 45 67 89</p>
+                    <p>Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
+                </div>
+                <div class="footer-center">
+                    <p>&copy; 2025 Agora Francia</p>
+                </div>
+                <div class="footer-right">
+                    <h3>Nous trouver</h3>
+                    <iframe src="https://www.google.com/maps?q=Sorbonne+Université,Paris&output=embed" width="220"
+                        height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
         </footer>
 
     </div>
