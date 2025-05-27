@@ -50,8 +50,6 @@ body {
 }
 
 .nav-icone {
-    width: 100px;
-    height: 100px;
     object-fit: contain;
     border-radius: 100%;
 }
@@ -291,4 +289,9 @@ table.panier th {
 
 #carrousel img{
     border-radius: 20px;
+    display: none !important;
+}
+
+#carrousel img.active {
+    display: block !important;
 }
