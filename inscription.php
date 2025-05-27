@@ -1,9 +1,8 @@
 <?php
-// Activation des erreurs
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 session_start();
-require_once('config/connexion.php'); // Connexion à la BDD
+require_once('config/connexion.php');
 
 $message = '';
 
@@ -12,9 +11,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = $_POST['nom'];
     $email = $_POST['email'];
     $mdp = $_POST['motdepasse'];
-    $role = $_POST['role']; // acheteur ou vendeur
+    $role = $_POST['role'];
 
-    // Vérifie si l'email existe déjà
     $check = $bdd->prepare("SELECT id FROM utilisateurs WHERE email = ?");
     $check->execute([$email]);
 
@@ -30,37 +28,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<?php include('includes/header.php'); ?>
-
-<h2 class="text-center mb-4">Créer un compte</h2>
-<form method="POST" class="mx-auto" style="max-width:400px;">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Inscription</title>
+</head>
+<body>
+    <h2>Formulaire d'inscription</h2>
     <?php if (!empty($message)) : ?>
-        <div class="alert alert-info"><?= $message ?></div>
+        <p><?= $message ?></p>
     <?php endif; ?>
-    <div class="mb-3">
-        <label class="form-label">Prénom</label>
-        <input type="text" name="prenom" class="form-control" required>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Nom</label>
-        <input type="text" name="nom" class="form-control" required>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input type="email" name="email" class="form-control" required>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Mot de passe</label>
-        <input type="password" name="motdepasse" class="form-control" required>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Rôle</label>
-        <select name="role" class="form-select" required>
+    <form method="POST">
+        <label>Prénom :</label><br>
+        <input type="text" name="prenom" required><br><br>
+
+        <label>Nom :</label><br>
+        <input type="text" name="nom" required><br><br>
+
+        <label>Email :</label><br>
+        <input type="email" name="email" required><br><br>
+
+        <label>Mot de passe :</label><br>
+        <input type="password" name="motdepasse" required><br><br>
+
+        <label>Rôle :</label><br>
+        <select name="role" required>
             <option value="acheteur">Acheteur</option>
             <option value="vendeur">Vendeur</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-success w-100">S'inscrire</button>
-</form>
+        </select><br><br>
 
-<?php include('includes/footer.php'); ?>
+        <button type="submit">S'inscrire</button>
+    </form>
+</body>
+</html>
