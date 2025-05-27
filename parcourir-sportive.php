@@ -57,17 +57,36 @@ if ($db_found) {
                 </div>
                 <?php foreach ($annonces as $annonce): ?>
                 <div class="col-12 col-md-4 mb-4">
-                    <a href="annonce.php?id=<?php echo $annonce['id']; ?>">
-                        <img src="<?php echo isset($annonce['image']) ? htmlspecialchars($annonce['image']) : 'images/default.jpg'; ?>" alt="<?php echo htmlspecialchars($annonce['titre']); ?>" class="img-fluid rounded mb-2" style="max-width:200px;">
-                        <p><?php echo htmlspecialchars($annonce['titre']); ?></p>
-                    </a>
+                                    <div class="card h-100 shadow-sm">
+                        <a href="annonce.php?id=<?php echo $annonce['id']; ?>">
+                            <img src="<?php echo isset($annonce['image']) ? htmlspecialchars($annonce['image']) : 'images/default.jpg'; ?>"
+                                alt="<?php echo htmlspecialchars($annonce['titre']); ?>"
+                                class="card-img-top img-fluid rounded mb-2"
+                                style="max-width:100%; max-height:220px; object-fit:cover;">
+                        </a>
+                        <div class="card-body text-center">
+                            <a href="annonce.php?id=<?php echo $annonce['id']; ?>" class="text-decoration-none text-dark">
+                                <p class="card-title fw-bold"><?php echo htmlspecialchars($annonce['titre']); ?></p>
+                            </a>
+                            <?php if (isset($annonce['type_vente']) && $annonce['type_vente'] === 'achat_immediat'): ?>
+                                <div class="d-grid gap-2 mt-2">
+                                    <a href="annonce.php?id=<?php echo $annonce['id']; ?>#acheter" class="btn btn-success">Acheter</a>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (isset($annonce['type_vente']) && $annonce['type_vente'] === 'enchere'): ?>
+                                <div class="d-grid gap-2 mt-2">
+                                    <a href="annonce.php?id=<?php echo $annonce['id']; ?>#encherir" class="btn btn-success">Enchérir</a>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (isset($annonce['type_vente']) && $annonce['type_vente'] === 'negociation'): ?>
+                                <div class="d-grid gap-2 mt-2">
+                                    <a href="annonce.php?id=<?php echo $annonce['id']; ?>#acheter" class="btn btn-success">Faire une offre</a>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
                 <?php endforeach; ?>
-                <?php if (empty($annonces)): ?>
-                <div class="col-12">
-                    <p>Aucun SUV disponible pour le moment.</p>
-                </div>
-                <?php endif; ?>
             </div>
         </main>
 
