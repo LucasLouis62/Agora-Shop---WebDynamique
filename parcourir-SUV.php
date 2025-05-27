@@ -1,3 +1,21 @@
+<?php
+// Connexion à la base de données
+$database = "agora";
+$db_handle = mysqli_connect('localhost', 'root', '');
+$db_found = mysqli_select_db($db_handle, $database);
+
+$annonces = [];
+if ($db_found) {
+    // On récupère tous les SUV (type_vente ou une colonne pour filtrer, à adapter si besoin)
+    $sql = "SELECT * FROM produits WHERE Catégorie = 'suv'";
+    $result = mysqli_query($db_handle, $sql);
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $annonces[] = $row;
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -8,7 +26,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="acceuil.js"></script>
     <link rel="stylesheet" href="styles/prime.css">
-    <title>Agora Francia – Tout parcourir - Sportive</title>
+    <title>Agora Francia – Tout parcourir - SUV</title>
 </head>
 
 <body>
@@ -31,32 +49,25 @@
 
         <!-- Section principale -->
         <main class="text-center mb-4">
-            <h2 class="text-center mb-3">Sportives disponibles</h2>
-            
+            <h2 class="text-center mb-3">SUV disponibles</h2>
+
             <div class="row justify-content-center">
                 <div class="mb-3 text-start">
                     <a class="btn btn-primary">Trier</a>
                 </div>
+                <?php foreach ($annonces as $annonce): ?>
                 <div class="col-12 col-md-4 mb-4">
-                    <img src="images/Sportive1.png" alt="SUV1" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Porsche 911 GT3RS</p>
+                    <a href="annonce.php?id=<?php echo $annonce['id']; ?>">
+                        <img src="<?php echo isset($annonce['image']) ? htmlspecialchars($annonce['image']) : 'images/default.jpg'; ?>" alt="<?php echo htmlspecialchars($annonce['titre']); ?>" class="img-fluid rounded mb-2" style="max-width:200px;">
+                        <p><?php echo htmlspecialchars($annonce['titre']); ?></p>
+                    </a>
                 </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <img src="images/Sportive2.png" alt="SUV2" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Maserati CA</p>
+                <?php endforeach; ?>
+                <?php if (empty($annonces)): ?>
+                <div class="col-12">
+                    <p>Aucun SUV disponible pour le moment.</p>
                 </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <img src="images/Sportive3.png" alt="SUV3" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Lamborghini Urus</p>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <img src="images/Sportive4.png" alt="SUV4" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Alpine A110 Radical Le Mans 2023</p>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <img src="images/Sportive5.png" alt="SUV5" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Renault RS01 Alain Prost F1 Monaco 2018 Spark S7079</p>
-                </div>
+                <?php endif; ?>
             </div>
         </main>
 
@@ -82,4 +93,5 @@
         </footer>
     </div>
 </body>
+
 </html>
