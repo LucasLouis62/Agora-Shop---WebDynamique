@@ -28,6 +28,7 @@ if (!$produit) {
     ];
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -64,25 +65,69 @@ if (!$produit) {
     </style>
 </head>
 <body>
-    <div class="container my-5">
-        <div class="titre-produit">
-            <?php echo htmlspecialchars($produit['titre']); ?>
-        </div>
-        <div class="row justify-content-center align-items-center">
-            <div class="col-md-5 mb-4 mb-md-0">
-                <div class="encadre-bleu text-center">
-                    <img src="<?php echo isset($produit['image']) ? htmlspecialchars($produit['image']) : 'images/default.jpg'; ?>" alt="Produit" class="img-fluid rounded" style="max-width:300px;">
-                </div>
+    <div class="container my-4 p-4 border rounded shadow" style="background:#fff;">
+        <!-- Logo -->
+        <header class="text-center mb-4">
+            <img src="images/logo_agora.png" alt="Logo Agora Francia" width="200" class="img-fluid">
+        </header>
+
+        <div class="container my-5">
+            <div class="titre-produit">
+                <?php echo htmlspecialchars($produit['titre']); ?>
             </div>
+            <div class="row justify-content-center align-items-center">
+                <div class="col-md-5 mb-4 mb-md-0">
+                    <div class="encadre-bleu text-center">
+                        <img src="<?php echo isset($produit['image']) ? htmlspecialchars($produit['image']) : 'images/default.jpg'; ?>" alt="Produit" class="img-fluid rounded" style="max-width:300px;">
+                    </div>
+                </div>
             <div class="col-md-7">
                 <div class="encadre-blanc">
                     <p><strong>Description :</strong> <?php echo htmlspecialchars($produit['description']); ?></p>
                     <p><strong>Date d'ajout :</strong> <?php echo htmlspecialchars($produit['date_ajout']); ?></p>
                     <p><strong>Type de vente :</strong> <?php echo htmlspecialchars($produit['type_vente']); ?></p>
-                    <p class="prix-produit">Prix : <?php echo htmlspecialchars($produit['prix']); ?> €</p>
+
+                    <?php if ($produit['type_vente'] === 'achat_immediat'): ?>
+                        <p class="prix-produit">Prix : <?php echo htmlspecialchars($produit['prix']); ?> €</p>
+                        <button class="btn btn-primary">Acheter</button>
+                    <?php elseif ($produit['type_vente'] === 'negociation'): ?>
+                        <p class="prix-produit">Prix : <?php echo htmlspecialchars($produit['prix']); ?> €</p>
+                        <button class="btn btn-primary">Acheter</button>
+                        <button class="btn btn-warning">Faire une offre</button>
+                        <br><br>
+                        <p><strong>Proposition d'offre restante : </strong></p>
+                    <?php elseif ($produit['type_vente'] === 'enchere'): ?>
+                        <p class="prix-produit">Prix Minimum : <?php echo htmlspecialchars($produit['prix']); ?> €</p>
+                        <p class="prix-produit">Enchère gagnante : <?php echo htmlspecialchars($produit['prix']); ?> €</p>
+                        <button class="btn btn-danger">Enchérir</button>
+                        <br><br>
+                        <p><strong>Fermeture de l'enchère dans :</strong></p>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Pied de page -->
+    <footer class="mt-4">
+        <div class="row text-center text-md-start align-items-center">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <h5>Contact</h5>
+                <p class="mb-1">Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
+                <p class="mb-1">Téléphone : 01 23 45 67 89</p>
+                <p class="mb-0">Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <p class="mb-0">&copy; 2025 Agora Francia</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Nous trouver</h5>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5250.744877226254!2d2.2859626768664922!3d48.85110800121838!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1748293349769!5m2!1sfr!2sfr"
+                        width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </footer>
     </div>
 </body>
 </html>
