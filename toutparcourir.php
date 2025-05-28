@@ -2,6 +2,12 @@
 session_start();
 require_once 'config/connexion.php';
 
+function rechercherProduits($bdd, $motCle) {
+    $stmt = $bdd->prepare("SELECT * FROM produits WHERE titre LIKE ?");
+    $stmt->execute(['%' . $motCle . '%']);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function getProduitsParCategorie($bdd, $categorie) {
     $stmt = $bdd->prepare("SELECT * FROM produits WHERE Catégorie = ?");
     $stmt->execute([$categorie]);
@@ -10,8 +16,14 @@ function getProduitsParCategorie($bdd, $categorie) {
 
 $categories = ['suv', 'berline', 'sportive'];
 $produitsParCategorie = [];
-foreach ($categories as $categorie) {
-    $produitsParCategorie[$categorie] = getProduitsParCategorie($bdd, $categorie);
+$recherche = $_GET['q'] ?? null;
+
+if ($recherche) {
+    $resultatsRecherche = rechercherProduits($bdd, $recherche);
+} else {
+    foreach ($categories as $categorie) {
+        $produitsParCategorie[$categorie] = getProduitsParCategorie($bdd, $categorie);
+    }
 }
 ?>
 
@@ -22,9 +34,7 @@ foreach ($categories as $categorie) {
     <title>Agora Francia – Tout Parcourir</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background: #f8f9fa;
-        }
+        body { background: #f8f9fa; }
         .carousel-container {
             overflow-x: auto;
             white-space: nowrap;
@@ -65,45 +75,74 @@ foreach ($categories as $categorie) {
         </div>
     </nav>
 
-    <h2 class="text-center text-primary mb-5">Tout Parcourir</h2>
-
-    <?php foreach ($produitsParCategorie as $categorie => $produits) : ?>
-        <h4 class="mb-3"><?= ucfirst($categorie) ?> 🚗 
-            <a href="parcourir-<?= $categorie ?>.php" class="btn btn-sm btn-outline-secondary ms-2">Voir tous</a>
-        </h4>
-        <div class="carousel-container mb-5">
-            <?php foreach ($produits as $produit) : ?>
-                <div class="card shadow-sm">
-                    <a href="annonce.php?id=<?= $produit['id'] ?>">
-                        <img src="<?= htmlspecialchars($produit['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($produit['titre']) ?>">
-                    </a>
-                    <div class="card-body text-center">
-                        <h6 class="card-title"><?= htmlspecialchars($produit['titre']) ?></h6>
-                        <p class="card-text small"><?= htmlspecialchars($produit['description']) ?></p>
-                        <p class="text-muted mb-2"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
-                        <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir l'annonce</a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+    <!-- Barre de recherche -->
+    <form method="get" action="toutparcourir.php" class="mb-5">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Rechercher un véhicule..." value="<?= htmlspecialchars($recherche ?? '') ?>">
+            <button class="btn btn-outline-secondary" type="submit">Rechercher</button>
         </div>
-    <?php endforeach; ?>
+    </form>
+
+    <!-- Résultats -->
+    <?php if ($recherche): ?>
+        <h4 class="mb-4">Résultats pour « <?= htmlspecialchars($recherche) ?> »</h4>
+        <?php if (empty($resultatsRecherche)): ?>
+            <p>Aucun résultat trouvé.</p>
+        <?php else: ?>
+            <div class="carousel-container mb-4">
+                <?php foreach ($resultatsRecherche as $produit): ?>
+                    <div class="card shadow-sm">
+                        <a href="annonce.php?id=<?= $produit['id'] ?>">
+                            <img src="<?= htmlspecialchars($produit['image']) ?>" class="card-img-top" alt="<?= $produit['titre'] ?>">
+                        </a>
+                        <div class="card-body text-center">
+                            <h6 class="card-title"><?= htmlspecialchars($produit['titre']) ?></h6>
+                            <p class="small"><?= htmlspecialchars($produit['description']) ?></p>
+                            <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
+                            <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir l'annonce</a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    <?php else: ?>
+        <h2 class="text-center text-primary mb-5">Tout Parcourir</h2>
+        <?php foreach ($produitsParCategorie as $categorie => $produits) : ?>
+            <h4 class="mb-3"><?= ucfirst($categorie) ?> 🚗 
+                <a href="parcourir-<?= $categorie ?>.php" class="btn btn-sm btn-outline-secondary ms-2">Voir tous</a>
+            </h4>
+            <div class="carousel-container mb-5">
+                <?php foreach ($produits as $produit) : ?>
+                    <div class="card shadow-sm">
+                        <a href="annonce.php?id=<?= $produit['id'] ?>">
+                            <img src="<?= htmlspecialchars($produit['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($produit['titre']) ?>">
+                        </a>
+                        <div class="card-body text-center">
+                            <h6 class="card-title"><?= htmlspecialchars($produit['titre']) ?></h6>
+                            <p class="small"><?= htmlspecialchars($produit['description']) ?></p>
+                            <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
+                            <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir l'annonce</a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endforeach; ?>
+    <?php endif; ?>
 
     <!-- Footer -->
-    <footer class="row text-center text-md-start align-items-center">
+    <footer class="row text-center text-md-start align-items-center mt-5">
         <div class="col-md-4 mb-3 mb-md-0">
             <h5>Contact</h5>
-            <p class="mb-1">Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
-            <p class="mb-1">Téléphone : 01 23 45 67 89</p>
-            <p class="mb-0">Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
+            <p>Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
+            <p>Téléphone : 01 23 45 67 89</p>
+            <p>Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
         </div>
         <div class="col-md-4 mb-3 mb-md-0">
-            <p class="mb-0">&copy; 2025 Agora Francia</p>
+            <p>&copy; 2025 Agora Francia</p>
         </div>
         <div class="col-md-4">
             <h5>Nous trouver</h5>
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5250.744877226254!2d2.2859626768664922!3d48.85110800121838!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1748293349769!5m2!1sfr!2sfr"
-                    width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <iframe src="https://www.google.com/maps/embed?pb=...etc..." width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"></iframe>
         </div>
     </footer>
 </div>
