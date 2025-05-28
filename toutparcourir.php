@@ -44,10 +44,10 @@ if ($recherche) {
             width: 250px;
             display: inline-block;
             margin-right: 1rem;
+            vertical-align: top;
         }
         .card-img-top {
             height: 180px;
-            width: 100%;
             object-fit: cover;
         }
         footer {
@@ -95,8 +95,13 @@ if ($recherche) {
                             <h6 class="card-title"><?= htmlspecialchars($produit['titre']) ?></h6>
                             <p class="small"><?= htmlspecialchars($produit['description']) ?></p>
                             <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
-                            <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir l'annonce</a>
-                            <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm mt-1">Ajouter</a>
+                            <div class="d-grid gap-1">
+                                <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir</a>
+                                <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm">Ajouter</a>
+                                <?php if ($produit['type_vente'] === 'negociation'): ?>
+                                    <a href="negociation.php?id=<?= $produit['id'] ?>" class="btn btn-outline-warning btn-sm">Négocier</a>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -112,14 +117,19 @@ if ($recherche) {
                 <?php foreach ($produits as $produit): ?>
                     <div class="card shadow-sm">
                         <a href="annonce.php?id=<?= $produit['id'] ?>">
-                            <img src="<?= htmlspecialchars($produit['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($produit['titre']) ?>">
+                            <img src="<?= htmlspecialchars($produit['image']) ?>" class="card-img-top" alt="<?= $produit['titre'] ?>">
                         </a>
                         <div class="card-body text-center">
                             <h6 class="card-title"><?= htmlspecialchars($produit['titre']) ?></h6>
                             <p class="small"><?= htmlspecialchars($produit['description']) ?></p>
                             <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
-                            <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir l'annonce</a>
-                            <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm mt-1">Ajouter</a>
+                            <div class="d-grid gap-1">
+                                <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir</a>
+                                <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm">Ajouter</a>
+                                <?php if ($produit['type_vente'] === 'negociation'): ?>
+                                    <a href="negociation.php?id=<?= $produit['id'] ?>" class="btn btn-outline-warning btn-sm">Négocier</a>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
