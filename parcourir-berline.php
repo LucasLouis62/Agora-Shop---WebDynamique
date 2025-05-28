@@ -6,8 +6,34 @@ $db_found = mysqli_select_db($db_handle, $database);
 
 $annonces = [];
 if ($db_found) {
-    // On récupère tous les SUV (type_vente ou une colonne pour filtrer, à adapter si besoin)
-    $sql = "SELECT * FROM produits WHERE Catégorie = 'berline'";
+    // Déterminer le tri en fonction des paramètres "tri", "valeur" et "prix"
+    $tri = isset($_GET['tri']) ? $_GET['tri'] : '';
+    $valeur = isset($_GET['valeur']) ? $_GET['valeur'] : '';
+    $prix_min = isset($_GET['prix_min']) ? intval($_GET['prix_min']) : 0;
+    $prix_max = isset($_GET['prix_max']) ? intval($_GET['prix_max']) : 0;
+
+    // Construire la requête SQL en fonction du tri, du filtre et de la plage de prix
+    $orderBy = '';
+    $whereClause = "WHERE Catégorie = 'berline'";
+
+    if (!empty($valeur)) {
+        $whereClause .= " AND type_vente = '" . mysqli_real_escape_string($db_handle, $valeur) . "'";
+    }
+
+    if ($prix_min > 0 && $prix_max > 0) {
+        $whereClause .= " AND prix BETWEEN $prix_min AND $prix_max";
+    }
+
+    if ($tri === 'prix_croissant') {
+        $orderBy = 'ORDER BY prix ASC';
+    } elseif ($tri === 'prix_decroissant') {
+        $orderBy = 'ORDER BY prix DESC';
+    } elseif ($tri === 'date_publication') {
+        $orderBy = 'ORDER BY date_ajout DESC';
+    }
+
+    // Requête SQL pour récupérer les berlines avec le tri, le filtre et la plage de prix
+    $sql = "SELECT * FROM produits $whereClause $orderBy";
     $result = mysqli_query($db_handle, $sql);
     if ($result) {
         while ($row = mysqli_fetch_assoc($result)) {
@@ -24,7 +50,7 @@ if ($db_found) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="acceuil.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="styles/prime.css">
     <title>Agora Francia – Tout parcourir - SUV</title>
 </head>
@@ -49,11 +75,44 @@ if ($db_found) {
 
         <!-- Section principale -->
         <main class="text-center mb-4">
-            <h2 class="text-center mb-3">SUV disponibles</h2>
+            <h2 class="text-center mb-3">Berlines disponibles</h2>
 
             <div class="row justify-content-center">
-                <div class="mb-3 text-start">
-                    <a class="btn btn-primary">Trier</a>
+                <div class="d-flex gap-2 mb-3 text-start">
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Trier
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <li><a class="dropdown-item" href="?tri=prix_croissant&valeur=<?php echo htmlspecialchars($valeur); ?>&prix_min=<?php echo htmlspecialchars($prix_min); ?>&prix_max=<?php echo htmlspecialchars($prix_max); ?>">Prix croissant</a></li>
+                            <li><a class="dropdown-item" href="?tri=prix_decroissant&valeur=<?php echo htmlspecialchars($valeur); ?>&prix_min=<?php echo htmlspecialchars($prix_min); ?>&prix_max=<?php echo htmlspecialchars($prix_max); ?>">Prix décroissant</a></li>
+                            <li><a class="dropdown-item" href="?tri=date_publication&valeur=<?php echo htmlspecialchars($valeur); ?>&prix_min=<?php echo htmlspecialchars($prix_min); ?>&prix_max=<?php echo htmlspecialchars($prix_max); ?>">Date de publication</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButtonType" data-bs-toggle="dropdown" aria-expanded="false">
+                            Type de vente
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonType">
+                            <li><a class="dropdown-item" href="?valeur=&prix_min=<?php echo htmlspecialchars($prix_min); ?>&prix_max=<?php echo htmlspecialchars($prix_max); ?>">Tous</a></li>
+                            <li><a class="dropdown-item" href="?valeur=achat_immediat&prix_min=<?php echo htmlspecialchars($prix_min); ?>&prix_max=<?php echo htmlspecialchars($prix_max); ?>">Achat immédiat</a></li>
+                            <li><a class="dropdown-item" href="?valeur=enchere&prix_min=<?php echo htmlspecialchars($prix_min); ?>&prix_max=<?php echo htmlspecialchars($prix_max); ?>">Enchère</a></li>
+                            <li><a class="dropdown-item" href="?valeur=negociation&prix_min=<?php echo htmlspecialchars($prix_min); ?>&prix_max=<?php echo htmlspecialchars($prix_max); ?>">Négociation</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenuButtonPrice" data-bs-toggle="dropdown" aria-expanded="false">
+                            Plage de prix
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonPrice">
+                            <li><a class="dropdown-item" href="?prix_min=1&prix_max=10000&valeur=<?php echo htmlspecialchars($valeur); ?>&tri=<?php echo htmlspecialchars($tri); ?>">0 - 10 000 €</a></li>
+                            <li><a class="dropdown-item" href="?prix_min=10001&prix_max=30000&valeur=<?php echo htmlspecialchars($valeur); ?>&tri=<?php echo htmlspecialchars($tri); ?>">10 001 - 30 000 €</a></li>
+                            <li><a class="dropdown-item" href="?prix_min=30001&prix_max=50000&valeur=<?php echo htmlspecialchars($valeur); ?>&tri=<?php echo htmlspecialchars($tri); ?>">30 001 - 50 000 €</a></li>
+                            <li><a class="dropdown-item" href="?prix_min=50001&prix_max=100000&valeur=<?php echo htmlspecialchars($valeur); ?>&tri=<?php echo htmlspecialchars($tri); ?>">50 001 - 100 000 €</a></li>
+                        </ul>
+                    </div>
                 </div>
                 <?php foreach ($annonces as $annonce): ?>
                 <div class="col-12 col-md-4 mb-4">
