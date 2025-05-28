@@ -1,8 +1,18 @@
+<?php
+session_start();
+
+// Redirection si non connecté
+if (!isset($_SESSION['id'])) {
+    header('Location: votrecompte.php');
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Votre compte – Agora Francia</title>
+    <title>Mon compte | Agora Francia</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -32,13 +42,19 @@
         </div>
     </nav>
 
-    <div class="container my-5">
-        <div class="card shadow mx-auto p-5 text-center" style="max-width: 500px;">
-            <h2 class="mb-4">Bienvenue sur Agora Francia</h2>
-            <p>Accédez à votre compte pour suivre vos commandes, vos ventes ou modifier vos informations.</p>
-            <div class="d-flex flex-column gap-3 mt-4">
-                <a href="connexion.php" class="btn btn-outline-primary btn-lg">🔐 Se connecter</a>
-                <a href="inscription.php" class="btn btn-success btn-lg">📝 Créer un compte</a>
+    <div class="container py-5">
+        <div class="card mx-auto p-4" style="max-width: 500px;">
+            <h2 class="text-center mb-4 text-primary">Bienvenue, <?= htmlspecialchars($_SESSION['prenom']) ?> 👋</h2>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>Prénom :</strong> <?= htmlspecialchars($_SESSION['prenom']) ?></li>
+                <li class="list-group-item"><strong>Nom :</strong> <?= htmlspecialchars($_SESSION['nom']) ?></li>
+                <li class="list-group-item"><strong>Email :</strong> <?= htmlspecialchars($_SESSION['email']) ?></li>
+                <li class="list-group-item"><strong>Rôle :</strong> <?= htmlspecialchars($_SESSION['role']) ?></li>
+            </ul>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="index.php" class="btn btn-outline-primary btn-custom">🏠 Retour à l'accueil</a>
+                <a href="deconnexion.php" class="btn btn-danger btn-custom">🔓 Se déconnecter</a>
             </div>
         </div>
     </div>

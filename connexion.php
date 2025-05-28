@@ -20,7 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['nom'] = $user['nom'];
         $_SESSION['email'] = $user['email'];
         $_SESSION['role'] = $user['role'];
-        header('Location: index.php'); // Redirection vers page dynamique
+        
+        if ($user['role'] === 'acheteur') {
+            header('Location: espace_acheteur.php'); // Redirection pour acheteur
+        } elseif ($user['role'] === 'administrateur') {
+            header('Location: espace_admin.php'); // Redirection pour administrateur
+        } elseif ($user['role'] === 'vendeur') {
+            header('Location: espace_vendeur.php'); // Redirection pour vendeur
+        }
         exit();
     } else {
         $message = "❌ Email ou mot de passe incorrect.";

@@ -47,11 +47,11 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <!-- Navigation -->
         <nav class="navbar navbar-expand justify-content-center mb-4">
             <div class="navbar-nav gap-2">
-                <a class="btn btn-primary" href="index.html">Accueil</a>
+                <a class="btn btn-primary" href="index.php">Accueil</a>
                 <a class="btn btn-primary" href="toutparcourir.php">Tout Parcourir</a>
                 <a class="btn btn-primary" href="notifications.php">Notifications</a>
-                <a class="btn btn-primary" href="panier.html">Panier</a>
-                <a class="btn btn-primary" href="votrecompte.html">Votre compte</a>
+                <a class="btn btn-primary" href="panier.php">Panier</a>
+                <a class="btn btn-primary" href="votrecompte.php">Votre compte</a>
             </div>
         </nav>
 
@@ -91,7 +91,7 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 <div class="col-md-4">
                     <h5>Nous trouver</h5>
-                    <iframe src="https://www.google.com/maps/embed?pb=..." width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"></iframe>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"></iframe>
                 </div>
             </div>
         </footer>
