@@ -40,7 +40,7 @@ if ($db_found) {
         <nav class="navbar navbar-expand justify-content-center mb-4">
             <div class="navbar-nav gap-2">
                 <a class="btn btn-primary" href="index.html">Accueil</a>
-                <a class="btn btn-primary" href="toutparcourir.html">Tout Parcourir</a>
+                <a class="btn btn-primary" href="toutparcourir.php">Tout Parcourir</a>
                 <a class="btn btn-primary" href="notifications.html">Notifications</a>
                 <a class="btn btn-primary" href="panier.html">Panier</a>
                 <a class="btn btn-primary" href="votrecompte.html">Votre compte</a>
