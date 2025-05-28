@@ -1,3 +1,21 @@
+<?php
+// Connexion à la base de données
+$database = "agora";
+$db_handle = mysqli_connect('localhost', 'root', '');
+$db_found = mysqli_select_db($db_handle, $database);
+
+$annonces = [];
+if ($db_found) {
+    // On récupère tous les SUV (type_vente ou une colonne pour filtrer, à adapter si besoin)
+    $sql = "SELECT * FROM produits WHERE Catégorie = 'suv'";
+    $result = mysqli_query($db_handle, $sql);
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $annonces[] = $row;
+        }
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -32,35 +50,43 @@
         <!-- Section principale -->
         <main class="text-center mb-4">
             <h2 class="text-center mb-3">SUV disponibles</h2>
-            
+
             <div class="row justify-content-center">
                 <div class="mb-3 text-start">
                     <a class="btn btn-primary">Trier</a>
                 </div>
+                <?php foreach ($annonces as $annonce): ?>
                 <div class="col-12 col-md-4 mb-4">
-                    <img src="images/SUV1.png" alt="SUV1" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Volkswagen T-Roc Cabriolet 1.5 TSI EVO 150 Start/Stop DSG7 R-Line</p>
+                    <div class="card h-100 shadow-sm">
+                        <a href="annonce.php?id=<?php echo $annonce['id']; ?>">
+                            <img src="<?php echo isset($annonce['image']) ? htmlspecialchars($annonce['image']) : 'images/default.jpg'; ?>"
+                                alt="<?php echo htmlspecialchars($annonce['titre']); ?>"
+                                class="card-img-top img-fluid rounded mb-2"
+                                style="max-width:100%; max-height:220px; object-fit:cover;">
+                        </a>
+                        <div class="card-body text-center">
+                            <a href="annonce.php?id=<?php echo $annonce['id']; ?>" class="text-decoration-none text-dark">
+                                <p class="card-title fw-bold"><?php echo htmlspecialchars($annonce['titre']); ?></p>
+                            </a>
+                            <?php if (isset($annonce['type_vente']) && $annonce['type_vente'] === 'achat_immediat'): ?>
+                                <div class="d-grid gap-2 mt-2">
+                                    <a href="annonce.php?id=<?php echo $annonce['id']; ?>#acheter" class="btn btn-success">Acheter</a>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (isset($annonce['type_vente']) && $annonce['type_vente'] === 'enchere'): ?>
+                                <div class="d-grid gap-2 mt-2">
+                                    <a href="annonce.php?id=<?php echo $annonce['id']; ?>#encherir" class="btn btn-success">Enchérir</a>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (isset($annonce['type_vente']) && $annonce['type_vente'] === 'negociation'): ?>
+                                <div class="d-grid gap-2 mt-2">
+                                    <a href="annonce.php?id=<?php echo $annonce['id']; ?>#acheter" class="btn btn-success">Faire une offre</a>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <img src="images/SUV2.jpg" alt="SUV2" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Mercedes GLC 220 d 9G-Tronic 4Matic</p>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <img src="images/SUV3.png" alt="SUV3" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Honda e:Ny1 204 ch</p>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <img src="images/SUV4.png" alt="SUV4" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Hyundai IONIQ 5 N 84 kWh - 609 ch</p>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <img src="images/SUV5.png" alt="SUV5" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Toyota Highlander Hybride 248 AWD-i Lounge</p>
-                </div>
-                <div class="col-12 col-md-4 mb-4">
-                    <img src="images/SUV6.png" alt="SUV6" class="img-fluid rounded mb-2" style="max-width:200px;">
-                    <p>Suzuki Vitara 1.4 Boosterjet Allgrip Hybrid</p>
-                </div>
+                <?php endforeach; ?>
             </div>
         </main>
 
@@ -86,4 +112,5 @@
         </footer>
     </div>
 </body>
+
 </html>
