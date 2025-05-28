@@ -97,7 +97,9 @@ if ($recherche) {
                             <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
                             <div class="d-grid gap-1">
                                 <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir</a>
-                                <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm">Ajouter</a>
+                                <?php if ($produit['type_vente'] !== 'enchere'): ?>
+                                    <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm">Ajouter</a>
+                                <?php endif; ?>
                                 <?php if ($produit['type_vente'] === 'negociation'): ?>
                                     <a href="negociation.php?id=<?= $produit['id'] ?>" class="btn btn-outline-warning btn-sm">Négocier</a>
                                 <?php endif; ?>
@@ -125,7 +127,9 @@ if ($recherche) {
                             <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
                             <div class="d-grid gap-1">
                                 <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir</a>
-                                <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm">Ajouter</a>
+                                <?php if ($produit['type_vente'] !== 'enchere'): ?>
+                                    <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm">Ajouter</a>
+                                <?php endif; ?>
                                 <?php if ($produit['type_vente'] === 'negociation'): ?>
                                     <a href="negociation.php?id=<?= $produit['id'] ?>" class="btn btn-outline-warning btn-sm">Négocier</a>
                                 <?php endif; ?>
