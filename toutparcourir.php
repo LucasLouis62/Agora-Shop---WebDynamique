@@ -59,23 +59,20 @@ if ($recherche) {
 </head>
 <body>
 <div class="container my-4 p-4 bg-white shadow rounded">
-    <!-- Logo -->
     <header class="text-center mb-4">
         <img src="images/logo_agora.png" alt="Logo Agora Francia" width="200" class="img-fluid">
     </header>
 
-    <!-- Navigation -->
     <nav class="navbar navbar-expand justify-content-center mb-4">
         <div class="navbar-nav gap-2">
             <a class="btn btn-primary" href="index.html">Accueil</a>
             <a class="btn btn-primary" href="toutparcourir.php">Tout Parcourir</a>
-            <a class="btn btn-primary" href="notifications.html">Notifications</a>
-            <a class="btn btn-primary" href="panier.html">Panier</a>
+            <a class="btn btn-primary" href="notifications.php">Notifications</a>
+            <a class="btn btn-primary" href="panier.php">Panier</a>
             <a class="btn btn-primary" href="<?= isset($_SESSION['id']) ? 'compte.php' : 'votrecompte.html' ?>">Votre compte</a>
         </div>
     </nav>
 
-    <!-- Barre de recherche -->
     <form method="get" action="toutparcourir.php" class="mb-5">
         <div class="input-group">
             <input type="text" name="q" class="form-control" placeholder="Rechercher un véhicule..." value="<?= htmlspecialchars($recherche ?? '') ?>">
@@ -83,7 +80,6 @@ if ($recherche) {
         </div>
     </form>
 
-    <!-- Résultats -->
     <?php if ($recherche): ?>
         <h4 class="mb-4">Résultats pour « <?= htmlspecialchars($recherche) ?> »</h4>
         <?php if (empty($resultatsRecherche)): ?>
@@ -100,6 +96,7 @@ if ($recherche) {
                             <p class="small"><?= htmlspecialchars($produit['description']) ?></p>
                             <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
                             <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir l'annonce</a>
+                            <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm mt-1">Ajouter</a>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -107,12 +104,12 @@ if ($recherche) {
         <?php endif; ?>
     <?php else: ?>
         <h2 class="text-center text-primary mb-5">Tout Parcourir</h2>
-        <?php foreach ($produitsParCategorie as $categorie => $produits) : ?>
+        <?php foreach ($produitsParCategorie as $categorie => $produits): ?>
             <h4 class="mb-3"><?= ucfirst($categorie) ?> 🚗 
                 <a href="parcourir-<?= $categorie ?>.php" class="btn btn-sm btn-outline-secondary ms-2">Voir tous</a>
             </h4>
             <div class="carousel-container mb-5">
-                <?php foreach ($produits as $produit) : ?>
+                <?php foreach ($produits as $produit): ?>
                     <div class="card shadow-sm">
                         <a href="annonce.php?id=<?= $produit['id'] ?>">
                             <img src="<?= htmlspecialchars($produit['image']) ?>" class="card-img-top" alt="<?= htmlspecialchars($produit['titre']) ?>">
@@ -122,6 +119,7 @@ if ($recherche) {
                             <p class="small"><?= htmlspecialchars($produit['description']) ?></p>
                             <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
                             <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir l'annonce</a>
+                            <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm mt-1">Ajouter</a>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -129,7 +127,6 @@ if ($recherche) {
         <?php endforeach; ?>
     <?php endif; ?>
 
-    <!-- Footer -->
     <footer class="row text-center text-md-start align-items-center mt-5">
         <div class="col-md-4 mb-3 mb-md-0">
             <h5>Contact</h5>
@@ -142,7 +139,7 @@ if ($recherche) {
         </div>
         <div class="col-md-4">
             <h5>Nous trouver</h5>
-            <iframe src="https://www.google.com/maps/embed?pb=...etc..." width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"></iframe>
+            <iframe src="https://www.google.com/maps/embed?pb=..." width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"></iframe>
         </div>
     </footer>
 </div>
