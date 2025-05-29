@@ -127,20 +127,33 @@ if ($db_found) {
                             <a href="annonce.php?id=<?= $annonce['id']; ?>" class="text-decoration-none text-dark">
                                 <p class="card-title fw-bold"><?= htmlspecialchars($annonce['titre']); ?></p>
                             </a>
-                            <?php if ($annonce['type_vente'] === 'achat_immediat'): ?>
-                                <form method="POST" action="ajouter_au_panier.php">
-                                    <input type="hidden" name="produit_id" value="<?= $annonce['id']; ?>">
-                                    <button type="submit" class="btn btn-outline-success mt-2">Ajouter au panier</button>
-                                </form>
-                            <?php elseif ($annonce['type_vente'] === 'enchere'): ?>
-                                <a href="annonce.php?id=<?= $annonce['id']; ?>#encherir" class="btn btn-success mt-2">Enchérir</a>
-                            <?php elseif ($annonce['type_vente'] === 'negociation'): ?>
-                                <a href="annonce.php?id=<?= $annonce['id']; ?>#acheter" class="btn btn-primary mt-2">Faire une offre</a>
-                                <form method="POST" action="ajouter_au_panier.php">
-                                    <input type="hidden" name="produit_id" value="<?= $annonce['id']; ?>">
-                                    <button type="submit" class="btn btn-outline-success mt-2">Ajouter au panier</button>
-                                </form>
-                            <?php endif; ?>
+                            <div class="d-flex flex-column gap-2 align-items-center">
+                                <?php if ($annonce['type_vente'] !== 'enchere'): ?>
+                                    <a href="ajouter_au_panier.php?id=<?= $annonce['id'] ?>" class="btn btn-success w-100">Ajouter au panier</a>
+                                <?php endif; ?>
+                                <?php if ($annonce['type_vente'] === 'negociation'): ?>
+                                    <a href="negociation.php?id=<?= $annonce['id'] ?>" class="btn btn-warning w-100">Faire une offre</a>
+                                <?php endif; ?>
+                                <?php if ($annonce['type_vente'] === 'enchere'): ?>
+                                    <?php
+                                        $temps_restant = '';
+                                        if (!empty($annonce['date_ajout'])) {
+                                            $date_ajout = new DateTime($annonce['date_ajout']);
+                                            $date_fin = clone $date_ajout;
+                                            $date_fin->modify('+72 hours');
+                                            $now = new DateTime();
+                                            if ($now < $date_fin) {
+                                                $interval = $now->diff($date_fin);
+                                                $temps_restant = $interval->format('%a jours %h h %i min %s s');
+                                            } else {
+                                                $temps_restant = 'Enchère terminée';
+                                            }
+                                        }
+                                    ?>
+                                    <a href="enchere.php?id=<?= $annonce['id'] ?>" class="btn btn-danger w-100">Enchérir</a>
+                                    <p class="mt-2 mb-0 small text-secondary" style="white-space:normal; word-break:break-word;">Fermeture de l'enchère dans : <strong><?= $temps_restant ?></strong></p>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -162,7 +175,7 @@ if ($db_found) {
                 </div>
                 <div class="col-md-4">
                     <h5>Nous trouver</h5>
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="220" height="120" style="border:0; border-radius:8px;"></iframe>
                 </div>
             </div>
         </footer>

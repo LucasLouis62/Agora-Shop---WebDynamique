@@ -1,5 +1,33 @@
 <?php
 session_start();
+
+// Préremplissage des champs si l'utilisateur est connecté
+$nom = $adresse = $carte = $expiration = $cvv = '';
+if (isset($_SESSION['id'])) {
+    $id = intval($_SESSION['id']);
+    // Connexion à la base de données
+    $db_handle = mysqli_connect('localhost', 'root', '');
+    $db_found = mysqli_select_db($db_handle, 'agora');
+    if ($db_found) {
+        // Données postales
+        $sql_p = "SELECT * FROM data_p WHERE id = $id LIMIT 1";
+        $res_p = mysqli_query($db_handle, $sql_p);
+        if ($res_p && mysqli_num_rows($res_p) > 0) {
+            $data_p = mysqli_fetch_assoc($res_p);
+            $nom = $data_p['prenom'] . ' ' . $data_p['nom'];
+            $adresse = $data_p['adresse'];
+        }
+        // Données bancaires
+        $sql_b = "SELECT * FROM data_b WHERE id = $id LIMIT 1";
+        $res_b = mysqli_query($db_handle, $sql_b);
+        if ($res_b && mysqli_num_rows($res_b) > 0) {
+            $data_b = mysqli_fetch_assoc($res_b);
+            $carte = $data_b['numero_carte'];
+            $expiration = $data_b['date_expiration'];
+            $cvv = $data_b['cvv'];
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -35,27 +63,27 @@ session_start();
       <form method="post" action="#">
         <div class="mb-3">
           <label class="form-label">Nom complet :</label>
-          <input type="text" name="nom" class="form-control" placeholder="Votre nom">
+          <input type="text" name="nom" class="form-control" placeholder="Votre nom" value="<?= htmlspecialchars($nom) ?>">
         </div>
 
         <div class="mb-3">
           <label class="form-label">Adresse de livraison :</label>
-          <input type="text" name="adresse" class="form-control" placeholder="12 rue des Fleurs, Paris">
+          <input type="text" name="adresse" class="form-control" placeholder="12 rue des Fleurs, Paris" value="<?= htmlspecialchars($adresse) ?>">
         </div>
 
         <div class="mb-3">
           <label class="form-label">Numéro de carte :</label>
-          <input type="text" name="carte" class="form-control" placeholder="XXXX-XXXX-XXXX-XXXX">
+          <input type="text" name="carte" class="form-control" placeholder="XXXX-XXXX-XXXX-XXXX" value="<?= htmlspecialchars($carte) ?>">
         </div>
 
         <div class="mb-3">
           <label class="form-label">Date d'expiration :</label>
-          <input type="month" name="expiration" class="form-control">
+          <input type="month" name="expiration" class="form-control" value="<?= htmlspecialchars($expiration) ?>">
         </div>
 
         <div class="mb-3">
           <label class="form-label">Code de sécurité (CVV) :</label>
-          <input type="text" name="cvv" class="form-control" placeholder="123">
+          <input type="text" name="cvv" class="form-control" placeholder="123" value="<?= htmlspecialchars($cvv) ?>">
         </div>
 
         <button type="submit" class="btn btn-success w-100 mb-2">Valider le paiement</button>

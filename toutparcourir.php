@@ -55,6 +55,13 @@ if ($recherche) {
             padding-top: 1rem;
             margin-top: 2rem;
         }
+        .text-truncate {
+            max-width: 210px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -92,7 +99,9 @@ if ($recherche) {
                             <img src="<?= htmlspecialchars($produit['image']) ?>" class="card-img-top" alt="<?= $produit['titre'] ?>">
                         </a>
                         <div class="card-body text-center">
-                            <h6 class="card-title"><?= htmlspecialchars($produit['titre']) ?></h6>
+                            <h6 class="card-title text-truncate" style="max-width: 210px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0 auto;">
+                                <?= htmlspecialchars($produit['titre']) ?>
+                            </h6>
                             <p class="small"><?= htmlspecialchars($produit['description']) ?></p>
                             <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
                             <div class="d-grid gap-1">
@@ -122,7 +131,9 @@ if ($recherche) {
                             <img src="<?= htmlspecialchars($produit['image']) ?>" class="card-img-top" alt="<?= $produit['titre'] ?>">
                         </a>
                         <div class="card-body text-center">
-                            <h6 class="card-title"><?= htmlspecialchars($produit['titre']) ?></h6>
+                            <h6 class="card-title text-truncate" style="max-width: 210px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0 auto;">
+                                <?= htmlspecialchars($produit['titre']) ?>
+                            </h6>
                             <p class="small"><?= htmlspecialchars($produit['description']) ?></p>
                             <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
                             <div class="d-grid gap-1">
@@ -173,7 +184,7 @@ if ($recherche) {
         </div>
         <div class="col-md-4">
             <h5>Nous trouver</h5>
-            <iframe src="https://www.google.com/maps/embed?pb=..." width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"></iframe>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"></iframe>
         </div>
     </footer>
 </div>

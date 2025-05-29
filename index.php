@@ -7,6 +7,11 @@ $db_handle = mysqli_connect('localhost', 'root', '');
 $db_found = mysqli_select_db($db_handle, $database);
 $carrousel_annonces = [];
 if ($db_found) {
+    // Suppression automatique des annonces dont l'enchère est terminée (plus de 72h)
+    $now = date('Y-m-d H:i:s');
+    $sql_delete = "DELETE FROM produits WHERE type_vente = 'enchere' AND DATE_ADD(date_ajout, INTERVAL 72 HOUR) < '$now'";
+    mysqli_query($db_handle, $sql_delete);
+
     // Sélectionner 5 annonces au hasard
     $sql = "SELECT id, titre, image FROM produits ORDER BY RAND() LIMIT 5";
     $result = mysqli_query($db_handle, $sql);
