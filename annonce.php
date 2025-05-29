@@ -89,10 +89,10 @@ if (!$produit) {
 
                     <?php if ($produit['type_vente'] === 'achat_immediat'): ?>
                         <p class="prix-produit">Prix : <?php echo htmlspecialchars($produit['prix']); ?> €</p>
-                        <button class="btn btn-primary">Acheter</button>
+                        <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-success">Ajouter au panier</a>
                     <?php elseif ($produit['type_vente'] === 'negociation'): ?>
                         <p class="prix-produit">Prix : <?php echo htmlspecialchars($produit['prix']); ?> €</p>
-                        <button class="btn btn-primary">Acheter</button>
+                        <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-success">Ajouter au panier</a>
                         <button class="btn btn-warning">Faire une offre</button>
                         <br><br>
                         <p><strong>Proposition d'offre restante : </strong></p>

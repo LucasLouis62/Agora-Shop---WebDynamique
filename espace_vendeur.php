@@ -14,14 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['poster_annonce'])) {
     $titre = $_POST['titre'];
     $description = $_POST['description'];
     $prix = $_POST['prix'];
-    $categorie = $_POST['categorie'];
+    $categorie = isset($_POST['categorie']) ? $_POST['categorie'] : '';
     $type_vente = $_POST['type_vente'];
     $image = $_POST['image'];
     $date_ajout = date('Y-m-d H:i:s');
 
     // Insérer les données dans la base de données
     require_once('config/connexion.php');
-    $stmt = $bdd->prepare("INSERT INTO produits (titre, description, prix, catégorie, type_vente, image, date_ajout) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $bdd->prepare("INSERT INTO produits (titre, description, prix, Catégorie, type_vente, image, date_ajout) VALUES (?, ?, ?, ?, ?, ?, ?)");
     if ($stmt->execute([$titre, $description, $prix, $categorie, $type_vente, $image, $date_ajout])) {
         $message = "✅ Annonce ajoutée avec succès !";
     } else {
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['poster_annonce'])) {
                 </div>
                 <div class="mb-3">
                     <label for="categorie" class="form-label">Catégorie</label>
-                    <select class="form-select" id="type_vente" name="type_vente" required>
+                    <select class="form-select" id="categorie" name="categorie" required>
                         <option value="suv">SUV</option>
                         <option value="berline">Berline</option>
                         <option value="sportive">Sportive</option>
