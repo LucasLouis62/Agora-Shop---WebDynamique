@@ -15,18 +15,18 @@ $id = intval($_SESSION['id']);
 
 // Gestion formulaire bancaire
 $b_message = '';
-if (isset($_POST['save_data_p'])) {
+if (isset($_POST['save_bancaire'])) {
     $type_carte = mysqli_real_escape_string($db_handle, $_POST['type_carte']);
     $numero_carte = mysqli_real_escape_string($db_handle, $_POST['numero_carte']);
     $nom_sur_carte = mysqli_real_escape_string($db_handle, $_POST['nom_sur_carte']);
     $date_expiration = mysqli_real_escape_string($db_handle, $_POST['date_expiration']);
     $cvv = mysqli_real_escape_string($db_handle, $_POST['cvv']);
     // Vérifie si déjà existant
-    $check = mysqli_query($db_handle, "SELECT * FROM data_p WHERE utilisateurs = $id");
+    $check = mysqli_query($db_handle, "SELECT * FROM data_b WHERE id = $id");
     if (mysqli_num_rows($check) > 0) {
-        $sql = "UPDATE data_p SET type_carte='$type_carte', numero_carte='$numero_carte', nom_sur_carte='$nom_sur_carte', date_expiration='$date_expiration', cvv='$cvv' WHERE id_utilisateur=$id";
+        $sql = "UPDATE data_b SET type_carte='$type_carte', numero_carte='$numero_carte', nom_sur_carte='$nom_sur_carte', date_expiration='$date_expiration', cvv='$cvv' WHERE id=$id";
     } else {
-        $sql = "INSERT INTO data_p (id_utilisateur, type_carte, numero_carte, nom_sur_carte, date_expiration, cvv) VALUES ($id, '$type_carte', '$numero_carte', '$nom_sur_carte', '$date_expiration', '$cvv')";
+        $sql = "INSERT INTO data_b (id, type_carte, numero_carte, nom_sur_carte, date_expiration, cvv) VALUES ($id, '$type_carte', '$numero_carte', '$nom_sur_carte', '$date_expiration', '$cvv')";
     }
     if (mysqli_query($db_handle, $sql)) {
         $b_message = '<div class="alert alert-success">Informations bancaires enregistrées !</div>';
@@ -37,7 +37,7 @@ if (isset($_POST['save_data_p'])) {
 
 // Gestion formulaire postal
 $p_message = '';
-if (isset($_POST['save_data_b'])) {
+if (isset($_POST['save_postal'])) {
     $nom = mysqli_real_escape_string($db_handle, $_POST['nom']);
     $prenom = mysqli_real_escape_string($db_handle, $_POST['prenom']);
     $adresse = mysqli_real_escape_string($db_handle, $_POST['adresse']);
@@ -45,11 +45,11 @@ if (isset($_POST['save_data_b'])) {
     $code_postal = mysqli_real_escape_string($db_handle, $_POST['code_postal']);
     $pays = mysqli_real_escape_string($db_handle, $_POST['pays']);
     $num_tel = mysqli_real_escape_string($db_handle, $_POST['num_tel']);
-    $check = mysqli_query($db_handle, "SELECT * FROM data_b WHERE utilisateurs = $id");
+    $check = mysqli_query($db_handle, "SELECT * FROM data_p WHERE id = $id");
     if (mysqli_num_rows($check) > 0) {
-        $sql = "UPDATE data_b SET nom='$nom', prenom='$prenom', adresse='$adresse', ville='$ville', code_postal='$code_postal', pays='$pays', num_tel='$num_tel' WHERE id_utilisateur=$id";
+        $sql = "UPDATE data_p SET nom='$nom', prenom='$prenom', adresse='$adresse', ville='$ville', code_postal='$code_postal', pays='$pays', num_tel='$num_tel' WHERE id=$id";
     } else {
-        $sql = "INSERT INTO data_b (id_utilisateur, nom, prenom, adresse, ville, code_postal, pays, num_tel) VALUES ($id, '$nom', '$prenom', '$adresse', '$ville', '$code_postal', '$pays', '$num_tel')";
+        $sql = "INSERT INTO data_p (id, nom, prenom, adresse, ville, code_postal, pays, num_tel) VALUES ($id, '$nom', '$prenom', '$adresse', '$ville', '$code_postal', '$pays', '$num_tel')";
     }
     if (mysqli_query($db_handle, $sql)) {
         $p_message = '<div class="alert alert-success">Informations postales enregistrées !</div>';
@@ -61,7 +61,7 @@ if (isset($_POST['save_data_b'])) {
 // Récupération des infos bancaires
 $data_b = null;
 if ($db_found) {
-    $sql_b = "SELECT * FROM data_p";
+    $sql_b = "SELECT * FROM data_b WHERE id = $id";
     $result_b = mysqli_query($db_handle, $sql_b);
     if ($result_b && mysqli_num_rows($result_b) > 0) {
         $data_b = mysqli_fetch_assoc($result_b);
@@ -71,7 +71,7 @@ if ($db_found) {
 // Récupération des infos postales
 $data_p = null;
 if ($db_found) {
-    $sql_p = "SELECT * FROM data_b";
+    $sql_p = "SELECT * FROM data_p WHERE id = $id";
     $result_p = mysqli_query($db_handle, $sql_p);
     if ($result_p && mysqli_num_rows($result_p) > 0) {
         $data_p = mysqli_fetch_assoc($result_p);
