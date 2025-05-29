@@ -62,6 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container my-5">
     <div class="card shadow p-4">
         <h3>Négocier pour : <?= htmlspecialchars($produit['titre']) ?></h3>
+        <div class="mb-3">
+            <span class="fw-bold">Prix actuel du produit :</span> <span class="text-success" style="font-size:1.2rem;"><?= htmlspecialchars($produit['prix']) ?> €</span>
+        </div>
         <form method="post">
             <div class="mb-3">
                 <label for="prix_propose" class="form-label">Votre prix proposé (€)</label>

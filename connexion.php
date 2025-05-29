@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ($user['role'] === 'acheteur') {
             header('Location: espace_acheteur.php'); // Redirection pour acheteur
-        } elseif ($user['role'] === 'administrateur') {
+        } elseif ($user['role'] === 'admin') {
             header('Location: espace_admin.php'); // Redirection pour administrateur
         } elseif ($user['role'] === 'vendeur') {
             header('Location: espace_vendeur.php'); // Redirection pour vendeur

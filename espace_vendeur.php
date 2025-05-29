@@ -110,6 +110,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['poster_annonce'])) {
         <?php if (!empty($message)): ?>
             <div class="alert alert-info mt-4"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
+
+        <div class="d-flex justify-content-between">
+                <a href="index.php" class="btn btn-outline-primary btn-custom">🏠 Retour à l'accueil</a>
+                <a href="deconnexion.php" class="btn btn-danger btn-custom">🔓 Se déconnecter</a>
+        </div>
     </div>
 
     <footer class="row text-center text-md-start align-items-center mt-5">
