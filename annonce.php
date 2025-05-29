@@ -27,6 +27,30 @@ if (!$produit) {
         'image' => 'images/default.jpg'
     ];
 }
+
+$enchere = null;
+if ($produit['type_vente'] === 'enchere') {
+    $sql_enchere = "SELECT MAX(montant) AS montant FROM encheres WHERE produit_id = " . intval($produit['id']);
+    $result_enchere = mysqli_query($db_handle, $sql_enchere);
+    if ($result_enchere && mysqli_num_rows($result_enchere) > 0) {
+        $enchere = mysqli_fetch_assoc($result_enchere);
+    }
+}
+
+// Calcul du temps restant pour une enchère (72h après date_ajout)
+$temps_restant = '';
+if ($produit['type_vente'] === 'enchere' && !empty($produit['date_ajout'])) {
+    $date_ajout = new DateTime($produit['date_ajout']);
+    $date_fin = clone $date_ajout;
+    $date_fin->modify('+72 hours');
+    $now = new DateTime();
+    if ($now < $date_fin) {
+        $interval = $now->diff($date_fin);
+        $temps_restant = $interval->format('%a jours %h h %i min %s s');
+    } else {
+        $temps_restant = 'Enchère terminée';
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -93,16 +117,20 @@ if (!$produit) {
                     <?php elseif ($produit['type_vente'] === 'negociation'): ?>
                         <p class="prix-produit">Prix : <?php echo htmlspecialchars($produit['prix']); ?> €</p>
                         <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-success">Ajouter au panier</a>
-                        <button class="btn btn-warning">Faire une offre</button>
+                        <a href="negociation.php?id=<?= $produit['id'] ?>" class="btn btn-warning">Faire une offre</a>
                         <br><br>
                         <p><strong>Proposition d'offre restante : </strong></p>
                     <?php elseif ($produit['type_vente'] === 'enchere'): ?>
                         <p class="prix-produit">Prix Minimum : <?php echo htmlspecialchars($produit['prix']); ?> €</p>
-                        <p class="prix-produit">Enchère gagnante : <?php echo htmlspecialchars($produit['prix']); ?> €</p>
-                        <button class="btn btn-danger">Enchérir</button>
+                        <p class="prix-produit">Enchère gagnante : <?php echo ($enchere && $enchere['montant'] !== null) ? htmlspecialchars($enchere['montant']) : htmlspecialchars($produit['prix']); ?> €</p>
+                        <a href="enchere.php?id=<?= $produit['id'] ?>" class="btn btn-danger">Enchérir</a>
                         <br><br>
-                        <p><strong>Fermeture de l'enchère dans :</strong></p>
+                        <p><strong>Fermeture de l'enchère dans :</strong> <?php echo $temps_restant; ?></p>
                     <?php endif; ?>
+                </div>
+                <br>
+                <div class="d-flex justify-content-between">
+                    <a href="index.php" class="btn btn-primary">Retourner à l'accueil</a>
                 </div>
             </div>
         </div>

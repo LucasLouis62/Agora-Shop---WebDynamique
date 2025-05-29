@@ -115,7 +115,7 @@ if ($db_found) {
             <div class="carrousel mx-auto" style="max-width:500px;">
                 <?php foreach ($carrousel_annonces as $annonce): ?>
                     <a href="annonce.php?id=<?= $annonce['id'] ?>">
-                        <img src="<?= htmlspecialchars($annonce['image']) ?>" alt="<?= htmlspecialchars($annonce['titre']) ?>" class="img-fluid">
+                        <img src="<?= htmlspecialchars($annonce['image']) ?>" alt="<?= htmlspecialchars($annonce['titre']) ?>" width=500px height=500px>
                     </a>
                 <?php endforeach; ?>
                 <div class="d-flex justify-content-center gap-3 mt-3">

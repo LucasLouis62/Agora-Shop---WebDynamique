@@ -133,8 +133,24 @@ if ($recherche) {
                                 <?php if ($produit['type_vente'] === 'negociation'): ?>
                                     <a href="negociation.php?id=<?= $produit['id'] ?>" class="btn btn-outline-warning btn-sm">Faire une offre</a>
                                 <?php endif; ?>
-                                 <?php if ($produit['type_vente'] === 'enchere'): ?>
+                                <?php if ($produit['type_vente'] === 'enchere'): ?>
+                                    <?php
+                                        $temps_restant = '';
+                                        if (!empty($produit['date_ajout'])) {
+                                            $date_ajout = new DateTime($produit['date_ajout']);
+                                            $date_fin = clone $date_ajout;
+                                            $date_fin->modify('+72 hours');
+                                            $now = new DateTime();
+                                            if ($now < $date_fin) {
+                                                $interval = $now->diff($date_fin);
+                                                $temps_restant = $interval->format('%a jours %h h %i min %s s');
+                                            } else {
+                                                $temps_restant = 'Enchère terminée';
+                                            }
+                                        }
+                                    ?>
                                     <a href="enchere.php?id=<?= $produit['id'] ?>" class="btn btn-outline-danger btn-sm">Enchérir</a>
+                                    <p class="mt-2 mb-0 small text-secondary" style="white-space:normal; word-break:break-word;">Fermeture de l'enchère dans : <strong><?= $temps_restant ?></strong></p>
                                 <?php endif; ?>
 
                             </div>
