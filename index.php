@@ -1,5 +1,21 @@
 <?php
 session_start();
+
+// Connexion à la base de données
+$database = "agora";
+$db_handle = mysqli_connect('localhost', 'root', '');
+$db_found = mysqli_select_db($db_handle, $database);
+$carrousel_annonces = [];
+if ($db_found) {
+    // Sélectionner 5 annonces au hasard
+    $sql = "SELECT id, titre, image FROM produits ORDER BY RAND() LIMIT 5";
+    $result = mysqli_query($db_handle, $sql);
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $carrousel_annonces[] = $row;
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -52,14 +68,12 @@ session_start();
         document.addEventListener("DOMContentLoaded", function() {
             const images = document.querySelectorAll(".carrousel img");
             let index = 0;
-            images[index].classList.add("active");
-
+            if(images.length > 0) images[index].classList.add("active");
             document.querySelector(".prev").addEventListener("click", () => {
                 images[index].classList.remove("active");
                 index = (index - 1 + images.length) % images.length;
                 images[index].classList.add("active");
             });
-
             document.querySelector(".next").addEventListener("click", () => {
                 images[index].classList.remove("active");
                 index = (index + 1) % images.length;
@@ -99,11 +113,11 @@ session_start();
         <main class="text-center mb-4">
             <h2 class="mb-4">🌟 Sélection du jour</h2>
             <div class="carrousel mx-auto" style="max-width:500px;">
-                <img src="images/alpine.jpg" class="img-fluid">
-                <img src="images/ferrari.jpg" class="img-fluid">
-                <img src="images/koenigsegg.jpg" class="img-fluid">
-                <img src="images/lambo.jpg" class="img-fluid">
-                <img src="images/porsche.jpg" class="img-fluid">
+                <?php foreach ($carrousel_annonces as $annonce): ?>
+                    <a href="annonce.php?id=<?= $annonce['id'] ?>">
+                        <img src="<?= htmlspecialchars($annonce['image']) ?>" alt="<?= htmlspecialchars($annonce['titre']) ?>" class="img-fluid">
+                    </a>
+                <?php endforeach; ?>
                 <div class="d-flex justify-content-center gap-3 mt-3">
                     <button class="btn-carrousel prev">⬅️</button>
                     <button class="btn-carrousel next">➡️</button>
