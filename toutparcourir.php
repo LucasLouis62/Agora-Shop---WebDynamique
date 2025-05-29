@@ -134,8 +134,9 @@ if ($recherche) {
                                     <a href="negociation.php?id=<?= $produit['id'] ?>" class="btn btn-outline-warning btn-sm">Faire une offre</a>
                                 <?php endif; ?>
                                  <?php if ($produit['type_vente'] === 'enchere'): ?>
-                                    <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-danger btn-sm">Enchérire</a>
+                                    <a href="enchere.php?id=<?= $produit['id'] ?>" class="btn btn-outline-danger btn-sm">Enchérir</a>
                                 <?php endif; ?>
+
                             </div>
                         </div>
                     </div>

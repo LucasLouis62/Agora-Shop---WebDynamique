@@ -1,34 +1,31 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
 session_start();
-require_once('config/connexion.php');
+require_once 'config/connexion.php';
 
-// Vérifie que l'utilisateur est connecté et est vendeur
-if (!isset($_SESSION['id']) || $_SESSION['role'] !== 'vendeur') {
-    header('Location: connexion.php');
-    exit();
-}
-
-$message = '';
-
+// Vérifier si le formulaire a été soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titre = $_POST['titre'];
     $description = $_POST['description'];
     $prix = $_POST['prix'];
+    $categorie = $_POST['categorie'];
     $type_vente = $_POST['type_vente'];
-    $image = $_FILES['image']['name'];
-    $tmp = $_FILES['image']['tmp_name'];
+    $date_fin_enchere = !empty($_POST['date_fin_enchere']) ? $_POST['date_fin_enchere'] : null;
 
-    // Dossier images
-    $dossier = "images/";
-    $chemin = $dossier . basename($image);
-    move_uploaded_file($tmp, $chemin);
+    // Gestion image
+    $imagePath = '';
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $imageName = basename($_FILES['image']['name']);
+        $targetPath = "images/" . $imageName;
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
+            $imagePath = $targetPath;
+        }
+    }
 
-    $stmt = $bdd->prepare("INSERT INTO produits (titre, description, prix, type_vente, image, vendeur_id) VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->execute([$titre, $description, $prix, $type_vente, $chemin, $_SESSION['id']]);
+    // Insertion du produit
+    $stmt = $bdd->prepare("INSERT INTO produits (titre, description, prix, Catégorie, image, type_vente, date_fin_enchere) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->execute([$titre, $description, $prix, $categorie, $imagePath, $type_vente, $date_fin_enchere]);
 
-    $message = "Produit ajouté avec succès ✅";
+    $message = "Produit ajouté avec succès !";
 }
 ?>
 
@@ -36,44 +33,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Ajouter un produit – Agora Francia</title>
+    <title>Ajouter un produit</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-    <div class="container my-5">
-        <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
-            <h2 class="text-center mb-4">Ajouter une voiture</h2>
-            <?php if (!empty($message)) : ?>
-                <div class="alert alert-success"><?= $message ?></div>
-            <?php endif; ?>
-            <form method="POST" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label class="form-label">Titre</label>
-                    <input type="text" name="titre" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea name="description" class="form-control" rows="4" required></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Prix (€)</label>
-                    <input type="number" step="0.01" name="prix" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Type de vente</label>
-                    <select name="type_vente" class="form-select" required>
-                        <option value="achat_immediat">Achat immédiat</option>
-                        <option value="enchere">Enchère</option>
-                        <option value="negociation">Négociation</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Image</label>
-                    <input type="file" name="image" class="form-control" accept="image/*" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Ajouter la voiture</button>
-            </form>
+<div class="container my-5 p-4 bg-white shadow rounded">
+    <nav class="mb-4">
+        <a class="btn btn-primary me-2" href="index.php">Accueil</a>
+        <a class="btn btn-secondary" href="votrecompte.php">Votre compte</a>
+    </nav>
+
+    <h2 class="mb-4">Ajouter un produit</h2>
+
+    <?php if (isset($message)): ?>
+        <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
+    <?php endif; ?>
+
+    <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label class="form-label">Titre</label>
+            <input type="text" name="titre" class="form-control" required>
         </div>
-    </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Prix de départ (€)</label>
+            <input type="number" name="prix" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Catégorie</label>
+            <select name="categorie" class="form-select" required>
+                <option value="suv">SUV</option>
+                <option value="berline">Berline</option>
+                <option value="sportive">Sportive</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Type de vente</label>
+            <select name="type_vente" class="form-select" required onchange="toggleEnchereDate(this.value)">
+                <option value="achat_immediat">Achat immédiat</option>
+                <option value="negociation">Négociation</option>
+                <option value="enchere">Enchère</option>
+            </select>
+        </div>
+
+        <div class="mb-3" id="date_enchere_field" style="display: none;">
+            <label class="form-label">Date de fin d’enchère</label>
+            <input type="datetime-local" name="date_fin_enchere" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Image</label>
+            <input type="file" name="image" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-success">Ajouter le produit</button>
+    </form>
+</div>
+
+<script>
+    function toggleEnchereDate(value) {
+        document.getElementById('date_enchere_field').style.display = value === 'enchere' ? 'block' : 'none';
+    }
+</script>
 </body>
 </html>

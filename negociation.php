@@ -8,7 +8,6 @@ if (!isset($_SESSION['id'])) {
 }
 
 $produit_id = $_GET['id'] ?? null;
-$message_confirmation = '';
 
 if (!$produit_id) {
     echo "Produit introuvable.";
@@ -25,23 +24,30 @@ if (!$produit || $produit['type_vente'] !== 'negociation') {
     exit;
 }
 
-$vendeur_id = $produit['vendeur_id'] ?? null;
-if (!$vendeur_id) {
-    echo "Erreur : aucun vendeur n'est associé à ce produit.";
-    exit;
-}
-
 // Formulaire soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $prix_propose = $_POST['prix_propose'];
     $message = $_POST['message'];
     $acheteur_id = $_SESSION['id'];
+    $vendeur_id = $produit['vendeur_id'] ?? null; // Peut être null
 
+    // Insertion dans la table propositions
     $stmt = $bdd->prepare("INSERT INTO propositions (id_produit, id_acheteur, id_vendeur, prix_propose, message, statut)
                            VALUES (?, ?, ?, ?, ?, 'en_attente')");
     $stmt->execute([$produit_id, $acheteur_id, $vendeur_id, $prix_propose, $message]);
 
-    $message_confirmation = "🎉 Votre proposition a bien été envoyée. Elle est en attente de réponse du vendeur.";
+    // Créer une notification
+    if ($vendeur_id) {
+        $notif = $bdd->prepare("INSERT INTO notifications (utilisateur_id, message) VALUES (?, ?)");
+        $notif->execute([$vendeur_id, "Nouvelle proposition reçue pour votre produit : $prix_propose €"]);
+    } else {
+        $notif = $bdd->prepare("INSERT INTO notifications (utilisateur_id, message) VALUES (?, ?)");
+        $notif->execute([$acheteur_id, "Votre offre est en attente (aucun vendeur défini pour ce produit)."]);
+    }
+
+    // Redirection
+    header("Location: toutparcourir.php?offre=envoyee");
+    exit;
 }
 ?>
 
@@ -55,12 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="bg-light">
 <div class="container my-5">
     <div class="card shadow p-4">
-        <h3 class="mb-3">Négocier pour : <?= htmlspecialchars($produit['titre']) ?></h3>
-
-        <?php if (!empty($message_confirmation)): ?>
-            <div class="alert alert-success text-center"><?= $message_confirmation ?></div>
-        <?php endif; ?>
-
+        <h3>Négocier pour : <?= htmlspecialchars($produit['titre']) ?></h3>
         <form method="post">
             <div class="mb-3">
                 <label for="prix_propose" class="form-label">Votre prix proposé (€)</label>
