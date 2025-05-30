@@ -1,52 +1,51 @@
 <?php
 session_start();
+require_once('config/connexion.php');
 
 // Redirection si non connecté
-if (!isset($_SESSION['id'])) {
+if (!isset($_SESSION['id']) || $_SESSION['role'] !== 'vendeur') {
     header('Location: votrecompte.php');
     exit();
 }
 
 $message = '';
 
+// Traitement du formulaire d'ajout
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['poster_annonce'])) {
-    // Récupérer les données du formulaire
     $titre = $_POST['titre'];
     $description = $_POST['description'];
     $prix = $_POST['prix'];
-    $categorie = isset($_POST['categorie']) ? $_POST['categorie'] : '';
+    $categorie = $_POST['categorie'] ?? '';
     $type_vente = $_POST['type_vente'];
     $image = $_POST['image'];
     $date_ajout = date('Y-m-d H:i:s');
     $vendeur_id = intval($_SESSION['id']);
-    
-    // Insérer les données dans la base de données
-    require_once('config/connexion.php');
-    $stmt = $bdd->prepare("INSERT INTO produits (titre, description, prix, Catégorie, type_vente, image, date_ajout, vendeur_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
+    $stmt = $bdd->prepare("INSERT INTO produits (titre, description, prix, Catégorie, type_vente, image, date_ajout, id_vendeur) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     if ($stmt->execute([$titre, $description, $prix, $categorie, $type_vente, $image, $date_ajout, $vendeur_id])) {
         $message = "✅ Annonce ajoutée avec succès !";
     } else {
         $message = "❌ Une erreur s'est produite lors de l'ajout de l'annonce.";
     }
 }
+
+// Récupération des annonces du vendeur
+$annonces = [];
+$stmt = $bdd->prepare("SELECT * FROM produits WHERE id_vendeur = ?");
+$stmt->execute([$_SESSION['id']]);
+$annonces = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mon compte | Agora Francia</title>
+    <title>Espace Vendeur | Agora Francia</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .card {
-            border-radius: 1rem;
-        }
-        .btn-lg {
-            padding: 12px 24px;
-        }
+        body { background-color: #f8f9fa; }
+        .card { border-radius: 1rem; }
+        .btn-lg { padding: 12px 24px; }
     </style>
 </head>
 <body>
@@ -61,15 +60,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['poster_annonce'])) {
             <a class="btn btn-primary" href="toutparcourir.php">Tout Parcourir</a>
             <a class="btn btn-primary" href="notifications.php">Notifications</a>
             <a class="btn btn-primary" href="panier.php">Panier</a>
-            <a class="btn btn-primary" href="<?= isset($_SESSION['id']) ? 'compte.php' : 'votrecompte.php' ?>">Votre compte</a>
+            <a class="btn btn-primary" href="compte.php">Votre compte</a>
         </div>
     </nav>
 
-    <div class="container py-5">
-        <div class="text-center">
-            <button class="btn btn-primary btn-lg" onclick="document.getElementById('formPosterAnnonce').style.display='block'">Poster une annonce</button>
+    <div class="container py-4">
+        <div class="text-center mb-4">
+            <button class="btn btn-primary btn-lg" onclick="document.getElementById('formPosterAnnonce').style.display='block'">📢 Poster une annonce</button>
         </div>
 
+        <?php if (!empty($message)): ?>
+            <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
+        <?php endif; ?>
+
+        <!-- Formulaire d'ajout -->
         <div id="formPosterAnnonce" class="mt-4" style="display: none;">
             <form method="POST" action="">
                 <div class="mb-3">
@@ -108,29 +112,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['poster_annonce'])) {
             </form>
         </div>
 
-        <?php if (!empty($message)): ?>
-            <div class="alert alert-info mt-4"><?= htmlspecialchars($message) ?></div>
+        <!-- Liste des annonces -->
+        <h4 class="mt-5">📦 Mes annonces</h4>
+        <?php if (count($annonces) === 0): ?>
+            <p class="text-muted">Vous n'avez encore posté aucune annonce.</p>
+        <?php else: ?>
+            <div class="row">
+                <?php foreach ($annonces as $a): ?>
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <img src="<?= htmlspecialchars($a['image']) ?>" class="card-img-top" alt="Image" style="height: 180px; object-fit: cover;">
+                            <div class="card-body">
+                                <h5 class="card-title"><?= htmlspecialchars($a['titre']) ?></h5>
+                                <p class="card-text"><?= htmlspecialchars($a['description']) ?></p>
+                                <p><strong><?= number_format($a['prix'], 0, ',', ' ') ?> €</strong></p>
+                                <p class="text-muted"><?= ucfirst($a['Catégorie']) ?> • <?= ucfirst($a['type_vente']) ?></p>
+                                <div class="d-grid gap-1">
+                                    <a href="modifier_produit.php?id=<?= $a['id'] ?>" class="btn btn-outline-primary btn-sm">✏️ Modifier</a>
+                                    <a href="supprimer_produit.php?id=<?= $a['id'] ?>" class="btn btn-outline-danger btn-sm" onclick="return confirm('Supprimer cette annonce ?')">🗑️ Supprimer</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         <?php endif; ?>
 
-        <div class="d-flex justify-content-between">
-                <a href="index.php" class="btn btn-outline-primary btn-custom">🏠 Retour à l'accueil</a>
-                <a href="deconnexion.php" class="btn btn-danger btn-custom">🔓 Se déconnecter</a>
+        <div class="d-flex justify-content-between mt-4">
+            <a href="index.php" class="btn btn-outline-secondary">🏠 Retour à l'accueil</a>
+            <a href="deconnexion.php" class="btn btn-danger">🔓 Se déconnecter</a>
         </div>
     </div>
 
     <footer class="row text-center text-md-start align-items-center mt-5">
-        <div class="col-md-4 mb-3 mb-md-0">
+        <div class="col-md-4">
             <h5>Contact</h5>
             <p>Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
             <p>Téléphone : 01 23 45 67 89</p>
             <p>Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
         </div>
-        <div class="col-md-4 mb-3 mb-md-0">
+        <div class="col-md-4">
             <p>&copy; 2025 Agora Francia</p>
         </div>
         <div class="col-md-4">
             <h5>Nous trouver</h5>
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="220" height="120" style="border:0; border-radius:8px;"></iframe>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18..." width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"></iframe>
         </div>
     </footer>
 </div>
