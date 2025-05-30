@@ -46,7 +46,7 @@ if (!isset($_SESSION['id'])) {
         <div class="card mx-auto p-4" style="max-width: 500px;">
             <h2 class="text-center mb-4 text-primary">Bienvenue, <?= htmlspecialchars($_SESSION['prenom']) ?> 👋</h2>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item"><strong>Prénom :</strong> <?= htmlspecialchars($_SESSION['prenom']) ?></li>
+                <?= isset($_SESSION['prenom']) ? htmlspecialchars($_SESSION['prenom']) : 'Utilisateur' ?>
                 <li class="list-group-item"><strong>Nom :</strong> <?= htmlspecialchars($_SESSION['nom']) ?></li>
                 <li class="list-group-item"><strong>Email :</strong> <?= htmlspecialchars($_SESSION['email']) ?></li>
                 <li class="list-group-item"><strong>Rôle :</strong> <?= htmlspecialchars($_SESSION['role']) ?></li>
@@ -56,6 +56,8 @@ if (!isset($_SESSION['id'])) {
                 <button class="btn btn-outline-success btn-lg" onclick="document.getElementById('ajoutAnnonce').style.display='block'">Ajouter une annonce</button>
                 <button class="btn btn-outline-secondary btn-lg" onclick="document.getElementById('ajoutVendeur').style.display='block'">Ajouter un vendeur</button>
                 <button class="btn btn-outline-danger btn-lg" onclick="document.getElementById('supprimerVendeur').style.display='block'">Supprimer un vendeur</button>
+                <button class="btn btn-outline-danger btn-lg" onclick="document.getElementById('supprimerAnnonce').style.display='block'">Supprimer une annonce</button>
+
             </div>
         </div>
         <!-- Bloc recherche annonce -->
@@ -105,6 +107,41 @@ if (!isset($_SESSION['id'])) {
                 <button type="submit" name="poster_annonce" class="btn btn-success">Ajouter l'annonce</button>
             </form>
         </div>
+        <div id="supprimerAnnonce" style="display:none;max-width:500px;margin:32px auto;">
+    <?php
+// Connexion et récupération des annonces existantes
+require_once('config/connexion.php');
+$stmt = $bdd->query("SELECT id, titre, prix FROM produits ORDER BY id DESC");
+$annonces_existantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+<h5 class="text-center mt-3">Annonces existantes</h5>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Titre</th>
+            <th>Prix (€)</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($annonces_existantes as $annonce): ?>
+            <tr>
+                <td><?= $annonce['id'] ?></td>
+                <td><?= htmlspecialchars($annonce['titre']) ?></td>
+                <td><?= number_format($annonce['prix'], 2, ',', ' ') ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+<form method="POST" action="">
+        <div class="mb-3">
+            <label for="id_annonce_sup" class="form-label">ID de l'annonce à supprimer</label>
+            <input type="number" class="form-control" id="id_annonce_sup" name="id_annonce_sup" required>
+        </div>
+        <button type="submit" name="supprimer_annonce" class="btn btn-danger">Supprimer l'annonce</button>
+    </form>
+</div>
         <!-- Bloc ajout vendeur -->
         <div id="ajoutVendeur" style="display:none;max-width:500px;margin:32px auto;">
             <form method="POST" action="">
@@ -180,6 +217,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajouter_vendeur'])) {
         echo '<div class="alert alert-success mt-3">Vendeur ajouté avec succès.</div>';
     } else {
         echo '<div class="alert alert-danger mt-3">Erreur lors de l\'ajout du vendeur.</div>';
+    }
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['supprimer_annonce'])) {
+    require_once('config/connexion.php');
+    $id_annonce = intval($_POST['id_annonce_sup']);
+
+    $stmt = $bdd->prepare("DELETE FROM produits WHERE id = ?");
+    if ($stmt->execute([$id_annonce])) {
+        if ($stmt->rowCount() > 0) {
+            echo '<div class="alert alert-success mt-3">Annonce supprimée avec succès.</div>';
+        } else {
+            echo '<div class="alert alert-warning mt-3">Aucune annonce trouvée avec cet ID.</div>';
+        }
+    } else {
+        echo '<div class="alert alert-danger mt-3">Erreur lors de la suppression de l\'annonce.</div>';
     }
 }
 

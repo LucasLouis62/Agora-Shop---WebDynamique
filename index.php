@@ -93,6 +93,12 @@ if ($db_found) {
         <header class="text-center mb-4">
             <img src="images/logo_agora.png" alt="Logo Agora Francia" width="220" class="img-fluid">
         </header>
+        <div class="text-center mt-4">
+    <p class="lead">
+        Bienvenue sur <strong>Agora Francia</strong>, la plateforme innovante de vente de véhicules neufs et d’occasion. 
+        Achetez, vendez, négociez ou enchérissez en toute simplicité et sécurité !
+    </p>
+</div>
 
         <!-- Barre de navigation -->
         <nav class="navbar navbar-expand justify-content-center mb-4">
