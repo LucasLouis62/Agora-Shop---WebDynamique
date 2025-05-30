@@ -3,6 +3,7 @@ session_start();
 
 // Préremplissage des champs si l'utilisateur est connecté
 $nom = $adresse = $carte = $expiration = $cvv = '';
+$message_paiement = '';
 if (isset($_SESSION['id'])) {
     $id = intval($_SESSION['id']);
     // Connexion à la base de données
@@ -26,10 +27,23 @@ if (isset($_SESSION['id'])) {
             $expiration = $data_b['date_expiration'];
             $cvv = $data_b['cvv'];
         }
+        // Suppression du panier si paiement validé
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Suppression des produits achetés de la base de données
+            if (!empty($_SESSION['panier'])) {
+                foreach ($_SESSION['panier'] as $article) {
+                    $prod_id = intval($article['id'] ?? 0);
+                    if ($prod_id > 0) {
+                        mysqli_query($db_handle, "DELETE FROM produits WHERE id = $prod_id");
+                    }
+                }
+            }
+            unset($_SESSION['panier']); // Vide le panier en session PHP
+            $message_paiement = '<div class="alert alert-success text-center">Merci pour votre commande !</div>';
+        }
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -59,40 +73,33 @@ if (isset($_SESSION['id'])) {
 
     <div class="payment-form">
       <h3 class="text-center mb-4 text-primary">Finaliser votre commande</h3>
-
+      <?= $message_paiement ?>
       <form method="post" action="#">
         <div class="mb-3">
           <label class="form-label">Nom complet :</label>
-          <input type="text" name="nom" class="form-control" placeholder="Votre nom" value="<?= htmlspecialchars($nom) ?>">
+          <input type="text" name="nom" class="form-control" placeholder="Votre nom" value="<?= htmlspecialchars($nom) ?>" required>
         </div>
-
         <div class="mb-3">
           <label class="form-label">Adresse de livraison :</label>
-          <input type="text" name="adresse" class="form-control" placeholder="12 rue des Fleurs, Paris" value="<?= htmlspecialchars($adresse) ?>">
+          <input type="text" name="adresse" class="form-control" placeholder="12 rue des Fleurs, Paris" value="<?= htmlspecialchars($adresse) ?>" required>
         </div>
-
         <div class="mb-3">
           <label class="form-label">Numéro de carte :</label>
-          <input type="text" name="carte" class="form-control" placeholder="XXXX-XXXX-XXXX-XXXX" value="<?= htmlspecialchars($carte) ?>">
+          <input type="text" name="carte" class="form-control" placeholder="XXXX-XXXX-XXXX-XXXX" value="<?= htmlspecialchars($carte) ?>" required>
         </div>
-
         <div class="mb-3">
           <label class="form-label">Date d'expiration :</label>
-          <input type="month" name="expiration" class="form-control" value="<?= htmlspecialchars($expiration) ?>">
+          <input type="month" name="expiration" class="form-control" value="<?= htmlspecialchars($expiration) ?>" required>
         </div>
-
         <div class="mb-3">
           <label class="form-label">Code de sécurité (CVV) :</label>
-          <input type="text" name="cvv" class="form-control" placeholder="123" value="<?= htmlspecialchars($cvv) ?>">
+          <input type="text" name="cvv" class="form-control" placeholder="123" value="<?= htmlspecialchars($cvv) ?>" required>
         </div>
-
         <button type="submit" class="btn btn-success w-100 mb-2">Valider le paiement</button>
         <a href="toutparcourir.php" class="btn btn-outline-secondary w-100">Retour au menu</a>
       </form>
-
       <p class="text-center mt-3 text-muted">* Ceci est une simulation, aucun paiement réel ne sera effectué.</p>
     </div>
-
     <footer class="mt-5 text-center text-muted">
       <p>&copy; 2025 Agora Francia</p>
     </footer>
