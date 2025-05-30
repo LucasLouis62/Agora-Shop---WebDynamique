@@ -22,14 +22,8 @@ if (isset($_GET['supprimer'])) {
     exit();
 }
 
-// Récupérer les notifications enrichies
-$stmt = $bdd->prepare("
-    SELECT n.*, p.titre, p.image 
-    FROM notifications n 
-    LEFT JOIN produits p ON n.produit_id = p.id 
-    WHERE n.utilisateur_id = ? 
-    ORDER BY n.date DESC
-");
+// Récupérer toutes les notifications
+$stmt = $bdd->prepare("SELECT * FROM notifications WHERE utilisateur_id = ? ORDER BY date DESC");
 $stmt->execute([$utilisateur_id]);
 $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -40,13 +34,33 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <title>Agora Francia – Notifications</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .notif-img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 15px;
+        }
+        .notif-card {
+            border-radius: 0.75rem;
+            padding: 15px;
+            background-color: #fdfdfd;
+            transition: background 0.2s ease;
+        }
+        .notif-card:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
 <body>
-<div class="container my-4 p-4 bg-white border rounded shadow">
+<div class="container my-4 p-4 border rounded shadow" style="background:#fff;">
+    <!-- Logo -->
     <header class="text-center mb-4">
         <img src="images/logo_agora.png" alt="Logo Agora Francia" width="200" class="img-fluid">
     </header>
 
+    <!-- Navigation -->
     <nav class="navbar navbar-expand justify-content-center mb-4">
         <div class="navbar-nav gap-2">
             <a class="btn btn-primary" href="index.php">Accueil</a>
@@ -57,35 +71,47 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </nav>
 
+    <!-- Notifications -->
     <main>
-        <h2 class="text-center mb-4">Vos Notifications</h2>
-
+        <h2 class="text-center mb-4">🔔 Vos Notifications</h2>
         <?php if (empty($notifications)): ?>
             <div class="alert alert-info text-center">Aucune notification pour le moment.</div>
         <?php else: ?>
             <div class="list-group">
                 <?php foreach ($notifications as $notif): ?>
-                    <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap <?= $notif['lue'] ? 'text-muted' : '' ?>">
-                        <div class="d-flex align-items-center">
-                            <?php if (!empty($notif['produit_id']) && !empty($notif['image'])): ?>
-                                <a href="annonce.php?id=<?= $notif['produit_id'] ?>" class="me-3">
-                                    <img src="<?= htmlspecialchars($notif['image']) ?>" alt="Image produit" width="60" height="40" class="rounded">
+                    <div class="list-group-item notif-card d-flex justify-content-between align-items-center flex-wrap <?= $notif['lue'] ? 'text-muted' : '' ?>">
+                        <?php
+                        // Vérifier si le message contient un produit
+                        preg_match('/produit_id=(\d+)/', $notif['message'], $matches);
+                        $produit_id = $matches[1] ?? null;
+
+                        if ($produit_id) {
+                            // Requête pour récupérer image et titre du produit
+                            $stmtProduit = $bdd->prepare("SELECT titre, image FROM produits WHERE id = ?");
+                            $stmtProduit->execute([$produit_id]);
+                            $produit = $stmtProduit->fetch(PDO::FETCH_ASSOC);
+                        }
+                        ?>
+                        <div class="d-flex align-items-center flex-grow-1">
+                            <?php if (!empty($produit)): ?>
+                                <a href="annonce.php?id=<?= $produit_id ?>" class="d-flex align-items-center text-decoration-none text-dark">
+                                    <img src="<?= htmlspecialchars($produit['image']) ?>" alt="Produit" class="notif-img">
+                                    <div>
+                                        <strong><?= htmlspecialchars($produit['titre']) ?></strong><br>
+                                        <?= htmlspecialchars(strip_tags($notif['message'])) ?>
+                                    </div>
                                 </a>
+                            <?php else: ?>
+                                <div>
+                                    <?= htmlspecialchars(strip_tags($notif['message'])) ?>
+                                </div>
                             <?php endif; ?>
-                            <div>
-                                <?php if (!empty($notif['produit_id']) && !empty($notif['titre'])): ?>
-                                    <a href="annonce.php?id=<?= $notif['produit_id'] ?>" class="text-decoration-none">
-                                        <strong><?= htmlspecialchars($notif['titre']) ?></strong>
-                                    </a><br>
-                                <?php endif; ?>
-                                <?= $notif['message'] ?>
-                            </div>
                         </div>
                         <div class="mt-2 mt-md-0">
                             <?php if (!$notif['lue']): ?>
-                                <a href="?marquer_lue=<?= $notif['id'] ?>" class="btn btn-outline-success btn-sm me-2">Marquer comme lue</a>
+                                <a href="?marquer_lue=<?= $notif['id'] ?>" class="btn btn-outline-success btn-sm me-1">✔</a>
                             <?php endif; ?>
-                            <a href="?supprimer=<?= $notif['id'] ?>" class="btn btn-outline-danger btn-sm">Supprimer</a>
+                            <a href="?supprimer=<?= $notif['id'] ?>" class="btn btn-outline-danger btn-sm">🗑</a>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -93,20 +119,21 @@ $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <?php endif; ?>
     </main>
 
-    <footer class="mt-5">
+    <!-- Footer -->
+    <footer class="mt-4">
         <div class="row text-center text-md-start align-items-center">
             <div class="col-md-4 mb-3 mb-md-0">
                 <h5>Contact</h5>
-                <p>Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
-                <p>Téléphone : 01 23 45 67 89</p>
-                <p>Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
+                <p class="mb-1">Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
+                <p class="mb-1">Téléphone : 01 23 45 67 89</p>
+                <p class="mb-0">Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
             </div>
             <div class="col-md-4 mb-3 mb-md-0">
                 <p class="mb-0">&copy; 2025 Agora Francia</p>
             </div>
             <div class="col-md-4">
                 <h5>Nous trouver</h5>
-                <iframe src="https://www.google.com/maps/embed?pb=..." width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen loading="lazy"></iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!..." width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen loading="lazy"></iframe>
             </div>
         </div>
     </footer>

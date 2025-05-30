@@ -1,3 +1,23 @@
+<?php
+session_start();
+require_once('config/connexion.php');
+
+// Traitement des critères de recherche
+if (isset($_POST['sauvegarder_criteres']) && isset($_SESSION['id'])) {
+    $utilisateur_id = $_SESSION['id'];
+    $motcle = trim($_POST['motcle']);
+    $prixmax = floatval($_POST['prixmax']);
+
+    $stmt = $bdd->prepare("INSERT INTO criteres_recherche (utilisateur_id, motcle, prixmax)
+                           VALUES (?, ?, ?) 
+                           ON DUPLICATE KEY UPDATE motcle = VALUES(motcle), prixmax = VALUES(prixmax)");
+    $stmt->execute([$utilisateur_id, $motcle, $prixmax]);
+    $message_criteres = "<div class='alert alert-success text-center mt-3'>Critères enregistrés avec succès !</div>";
+} else {
+    $message_criteres = '';
+}
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -41,6 +61,26 @@
                 <a href="inscription.php" class="btn btn-success btn-lg">📝 Créer un compte</a>
             </div>
         </div>
+
+        <?= $message_criteres ?>
+
+        <!-- Bloc Critères de recherche -->
+        <div class="card shadow mt-5 p-4">
+            <h4 class="mb-3 text-center text-primary">🔎 Sauvegarder vos critères de recherche</h4>
+            <form action="votrecompte.php" method="post">
+                <div class="mb-3">
+                    <label for="motcle" class="form-label">Mot-clé (ex : SUV, Tesla, électrique)</label>
+                    <input type="text" name="motcle" id="motcle" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="prixmax" class="form-label">Prix maximum (€)</label>
+                    <input type="number" name="prixmax" id="prixmax" class="form-control" min="1" step="1">
+                </div>
+                <button type="submit" name="sauvegarder_criteres" class="btn btn-outline-success w-100">
+                    Enregistrer les critères
+                </button>
+            </form>
+        </div>
     </div>
 
     <footer class="row text-center text-md-start align-items-center mt-5">
@@ -55,7 +95,7 @@
         </div>
         <div class="col-md-4">
             <h5>Nous trouver</h5>
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="220" height="120" style="border:0; border-radius:8px;"></iframe>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen loading="lazy"></iframe>
         </div>
     </footer>
 </div>
