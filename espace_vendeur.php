@@ -18,11 +18,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['poster_annonce'])) {
     $type_vente = $_POST['type_vente'];
     $image = $_POST['image'];
     $date_ajout = date('Y-m-d H:i:s');
-
+    $vendeur_id = intval($_SESSION['id']);
+    
     // Insérer les données dans la base de données
     require_once('config/connexion.php');
-    $stmt = $bdd->prepare("INSERT INTO produits (titre, description, prix, Catégorie, type_vente, image, date_ajout) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    if ($stmt->execute([$titre, $description, $prix, $categorie, $type_vente, $image, $date_ajout])) {
+    $stmt = $bdd->prepare("INSERT INTO produits (titre, description, prix, Catégorie, type_vente, image, date_ajout, vendeur_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    if ($stmt->execute([$titre, $description, $prix, $categorie, $type_vente, $image, $date_ajout, $vendeur_id])) {
         $message = "✅ Annonce ajoutée avec succès !";
     } else {
         $message = "❌ Une erreur s'est produite lors de l'ajout de l'annonce.";
