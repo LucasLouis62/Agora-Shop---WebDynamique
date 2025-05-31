@@ -1,18 +1,20 @@
 <?php
+// Démarrage de la session utilisateur
 session_start();
 
-// Connexion à la base de données
+// Connexion à la base de données 'agora'
 $database = "agora";
 $db_handle = mysqli_connect('localhost', 'root', '');
 $db_found = mysqli_select_db($db_handle, $database);
 $carrousel_annonces = [];
+
 if ($db_found) {
     // Suppression automatique des annonces dont l'enchère est terminée (plus de 72h)
     $now = date('Y-m-d H:i:s');
     $sql_delete = "DELETE FROM produits WHERE type_vente = 'enchere' AND DATE_ADD(date_ajout, INTERVAL 72 HOUR) < '$now'";
     mysqli_query($db_handle, $sql_delete);
 
-    // Sélectionner 5 annonces au hasard
+    // Sélectionner 5 annonces au hasard pour le carrousel
     $sql = "SELECT id, titre, image FROM produits ORDER BY RAND() LIMIT 5";
     $result = mysqli_query($db_handle, $sql);
     if ($result) {
@@ -29,6 +31,7 @@ if ($db_found) {
     <meta charset="UTF-8">
     <title>Agora Francia – Accueil</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Styles pour carrousel -->
     <style>
         body {
             background: #f8fbfd;
@@ -69,6 +72,7 @@ if ($db_found) {
             border-radius: 8px;
         }
     </style>
+    <!-- Scripte js pour carrousel -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const images = document.querySelectorAll(".carrousel img");
@@ -87,42 +91,31 @@ if ($db_found) {
         });
     </script>
 </head>
+
 <body>
-    <div class="container my-4 p-4 border rounded shadow bg-white">
-        <!-- Logo -->
-        <header class="text-center mb-4">
-            <img src="images/logo_agora.png" alt="Logo Agora Francia" width="220" class="img-fluid">
-        </header>
-        <div class="text-center mt-4">
-    <p class="lead">
-        Bienvenue sur <strong>Agora Francia</strong>, la plateforme innovante de vente de véhicules neufs et d’occasion. 
-        Achetez, vendez, négociez ou enchérissez en toute simplicité et sécurité !
-    </p>
-</div>
+    <!-- Logo -->
+    <?php include 'includes/header.php'; ?>
 
-        <!-- Barre de navigation -->
-        <nav class="navbar navbar-expand justify-content-center mb-4">
-            <div class="navbar-nav gap-2">
-                <a class="btn btn-primary" href="index.php">Accueil</a>
-                <a class="btn btn-primary" href="toutparcourir.php">Tout Parcourir</a>
-                <a class="btn btn-primary" href="notifications.php">Notifications</a>
-                <a class="btn btn-primary" href="panier.php">Panier</a>
-                <?php if (isset($_SESSION['id'])) : ?>
-                    <a class="btn btn-success" href="compte.php">👤 Mon compte</a>
-                <?php else : ?>
-                    <a class="btn btn-primary" href="votrecompte.php">Votre compte</a>
-                <?php endif; ?>
-            </div>
-        </nav>
+    <!-- Barre de navigation -->
+    <?php include 'includes/navigation.php'; ?>
 
-        <!-- Message de bienvenue -->
-        <?php if (isset($_SESSION['prenom'])) : ?>
-            <p class="text-center welcome">Bienvenue, <?= htmlspecialchars($_SESSION['prenom']) ?> !</p>
-        <?php endif; ?>
+    <!-- Paragraphe d'introduction d'Agora Shop -->
+    <div class="d-flex justify-content-center">
+        <p class="lead text-center" style="max-width:700px; text-align:justify;">
+            Bienvenue sur <strong>Agora Francia</strong>, la plateforme innovante de vente de véhicules neufs et d’occasion. 
+            Achetez, vendez, négociez ou enchérissez en toute simplicité et sécurité !
+        </p>
+    </div>
+
+    <!-- Message de bienvenue si utilisateur connecté -->
+    <?php if (isset($_SESSION['prenom'])) : ?>
+        <p class="text-center welcome">Bienvenue, <?= htmlspecialchars($_SESSION['prenom']) ?> !</p>
+    <?php endif; ?>
 
         <!-- Section principale -->
         <main class="text-center mb-4">
             <h2 class="mb-4">🌟 Sélection du jour</h2>
+            <!-- Code carroussel TP4 -->
             <div class="carrousel mx-auto" style="max-width:500px;">
                 <?php foreach ($carrousel_annonces as $annonce): ?>
                     <a href="annonce.php?id=<?= $annonce['id'] ?>">
@@ -137,25 +130,7 @@ if ($db_found) {
         </main>
 
         <!-- Footer -->
-        <footer class="mt-5">
-            <div class="row text-center text-md-start align-items-center">
-                <div class="col-md-4 mb-3 mb-md-0">
-                    <h5>Contact</h5>
-                    <p>Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
-                    <p>Téléphone : 01 23 45 67 89</p>
-                    <p>Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
-                </div>
-                <div class="col-md-4 mb-3 mb-md-0">
-                    <p class="mb-0">&copy; 2025 Agora Francia</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Nous trouver</h5>
-                    <div class="map-container">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                    </div>
-                </div>
-            </div>
-        </footer>
+        <?php include 'includes/footer.php'; ?>
     </div>
 </body>
 </html>

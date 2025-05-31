@@ -1,28 +1,36 @@
 <?php
+// Démarrage de la session utilisateur
 session_start();
-// Connexion à la base de données
+
+// Connexion à la base de données 'agora'
 $database = "agora";
 $db_handle = mysqli_connect('localhost', 'root', '');
 $db_found = mysqli_select_db($db_handle, $database);
 
+// Tableau pour stocker les annonces filtrées
 $annonces = [];
 if ($db_found) {
+    // Récupération des paramètres de tri, de type de vente et de plage de prix
     $tri = isset($_GET['tri']) ? $_GET['tri'] : '';
     $valeur = isset($_GET['valeur']) ? $_GET['valeur'] : '';
     $prix_min = isset($_GET['prix_min']) ? intval($_GET['prix_min']) : 0;
     $prix_max = isset($_GET['prix_max']) ? intval($_GET['prix_max']) : 0;
 
+    // Construction dynamique de la requête SQL selon les filtres
     $orderBy = '';
     $whereClause = "WHERE Catégorie = 'suv'";
 
+    // Filtre sur le type de vente si précisé
     if (!empty($valeur)) {
         $whereClause .= " AND type_vente = '" . mysqli_real_escape_string($db_handle, $valeur) . "'";
     }
 
+    // Filtre sur la plage de prix si précisée
     if ($prix_min > 0 && $prix_max > 0) {
         $whereClause .= " AND prix BETWEEN $prix_min AND $prix_max";
     }
 
+    // Gestion du tri
     if ($tri === 'prix_croissant') {
         $orderBy = 'ORDER BY prix ASC';
     } elseif ($tri === 'prix_decroissant') {
@@ -31,6 +39,7 @@ if ($db_found) {
         $orderBy = 'ORDER BY date_ajout DESC';
     }
 
+    // Exécution de la requête SQL finale
     $sql = "SELECT * FROM produits $whereClause $orderBy";
     $result = mysqli_query($db_handle, $sql);
     if ($result) {
@@ -40,6 +49,7 @@ if ($db_found) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -51,26 +61,19 @@ if ($db_found) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="styles/prime.css">
 </head>
-<body>
-<div class="container my-4 p-4 border rounded shadow bg-white">
-    <header class="text-center mb-4">
-        <img src="images/logo_agora.png" alt="Logo Agora Francia" width="200" class="img-fluid">
-    </header>
 
-    <nav class="navbar navbar-expand justify-content-center mb-4">
-        <div class="navbar-nav gap-2">
-            <a class="btn btn-primary" href="index.php">Accueil</a>
-            <a class="btn btn-primary" href="toutparcourir.php">Tout Parcourir</a>
-            <a class="btn btn-primary" href="notifications.php">Notifications</a>
-            <a class="btn btn-primary" href="panier.php">Panier</a>
-            <a class="btn btn-primary" href="votrecompte.php">Votre compte</a>
-        </div>
-    </nav>
+<body>
+    <!-- Logo -->
+    <?php include 'includes/header.php'; ?>
+
+    <!-- Barre de navigation -->
+    <?php include 'includes/navigation.php'; ?>
 
     <main class="text-center mb-4">
         <h2 class="mb-3">SUV disponibles</h2>
 
         <div class="row justify-content-center">
+            <!-- Bouton de tris -->
             <div class="d-flex gap-2 mb-3 text-start">
                 <!-- Tri -->
                 <div class="dropdown">
@@ -81,7 +84,8 @@ if ($db_found) {
                         <li><a class="dropdown-item" href="?tri=date_publication&valeur=<?= htmlspecialchars($valeur) ?>&prix_min=<?= $prix_min ?>&prix_max=<?= $prix_max ?>">Date de publication</a></li>
                     </ul>
                 </div>
-                <!-- Type -->
+
+                <!-- Type de vente -->
                 <div class="dropdown">
                     <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">Type de vente</button>
                     <ul class="dropdown-menu">
@@ -91,7 +95,8 @@ if ($db_found) {
                         <li><a class="dropdown-item" href="?valeur=negociation&prix_min=<?= $prix_min ?>&prix_max=<?= $prix_max ?>">Négociation</a></li>
                     </ul>
                 </div>
-                <!-- Prix -->
+
+                <!-- Plage de prix -->
                 <div class="dropdown">
                     <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">Plage de prix</button>
                     <ul class="dropdown-menu">
@@ -108,6 +113,7 @@ if ($db_found) {
                 <div class="col-12 col-md-4 mb-4">
                     <div class="card h-100 shadow-sm">
                         <a href="annonce.php?id=<?= $annonce['id'] ?>">
+                            <!-- Affichage Image et titre selon id de l'annonce -->
                             <img src="<?= htmlspecialchars($annonce['image'] ?? 'images/default.jpg') ?>"
                                  alt="<?= htmlspecialchars($annonce['titre']) ?>"
                                  class="card-img-top img-fluid rounded mb-2"
@@ -118,6 +124,7 @@ if ($db_found) {
                                 <p class="fw-bold"><?= htmlspecialchars($annonce['titre']) ?></p>
                             </a>
 
+                            <!-- Affichage des boutons selon type de vente -->
                             <div class="d-flex flex-column gap-2 align-items-center">
                                 <?php if ($annonce['type_vente'] !== 'enchere'): ?>
                                     <a href="ajouter_au_panier.php?id=<?= $annonce['id'] ?>" class="btn btn-success w-100">Ajouter au panier</a>
@@ -126,21 +133,7 @@ if ($db_found) {
                                     <a href="negociation.php?id=<?= $annonce['id'] ?>" class="btn btn-warning w-100">Faire une offre</a>
                                 <?php endif; ?>
                                 <?php if ($annonce['type_vente'] === 'enchere'): ?>
-                                    <?php
-                                        $temps_restant = '';
-                                        if (!empty($annonce['date_ajout'])) {
-                                            $date_ajout = new DateTime($annonce['date_ajout']);
-                                            $date_fin = clone $date_ajout;
-                                            $date_fin->modify('+72 hours');
-                                            $now = new DateTime();
-                                            if ($now < $date_fin) {
-                                                $interval = $now->diff($date_fin);
-                                                $temps_restant = $interval->format('%a jours %h h %i min %s s');
-                                            } else {
-                                                $temps_restant = 'Enchère terminée';
-                                            }
-                                        }
-                                    ?>
+                                    <?php include 'includes/temps_restant.php'; ?>
                                     <a href="enchere.php?id=<?= $annonce['id'] ?>" class="btn btn-danger w-100">Enchérir</a>
                                     <p class="mt-2 mb-0 small text-secondary" style="white-space:normal; word-break:break-word;">Fermeture de l'enchère dans : <strong><?= $temps_restant ?></strong></p>
                                 <?php endif; ?>
@@ -152,23 +145,7 @@ if ($db_found) {
         </div>
     </main>
 
-    <footer class="mt-4">
-        <div class="row text-center text-md-start align-items-center">
-            <div class="col-md-4 mb-3">
-                <h5>Contact</h5>
-                <p>Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
-                <p>Téléphone : 01 23 45 67 89</p>
-                <p>Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
-            </div>
-            <div class="col-md-4 mb-3">
-                <p>&copy; 2025 Agora Francia</p>
-            </div>
-            <div class="col-md-4">
-                <h5>Nous trouver</h5>
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="220" height="120" style="border-radius:8px;"></iframe>
-            </div>
-        </div>
-    </footer>
-</div>
+    <!-- Footer -->
+        <?php include 'includes/footer.php'; ?>
 </body>
 </html>

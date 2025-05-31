@@ -1,12 +1,16 @@
 <?php
+// Démarrage de la session utilisateur
 session_start();
+// Inclusion de la connexion PDO à la base de données
 require_once 'config/connexion.php';
 
+// Vérification que l'utilisateur est bien un vendeur connecté
 if (!isset($_SESSION['id']) || $_SESSION['role'] !== 'vendeur') {
     header("Location: connexion.php");
     exit;
 }
 
+// Vérification de la présence de l'ID du produit à modifier
 if (!isset($_GET['id'])) {
     echo "Produit introuvable.";
     exit;
@@ -15,26 +19,29 @@ if (!isset($_GET['id'])) {
 $produit_id = intval($_GET['id']);
 $id_vendeur = $_SESSION['id'];
 
-// Récupérer les infos du produit à modifier
+// Récupération des informations du produit à modifier (sécurité : doit appartenir au vendeur connecté)
 $stmt = $bdd->prepare("SELECT * FROM produits WHERE id = ? AND id_vendeur = ?");
 $stmt->execute([$produit_id, $id_vendeur]);
 $produit = $stmt->fetch();
 
+// Si le produit n'existe pas ou n'appartient pas au vendeur, on bloque
 if (!$produit) {
     echo "Produit non trouvé ou non autorisé.";
     exit;
 }
 
-// Traitement de la modification
+// Traitement du formulaire de modification
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $titre = $_POST['titre'];
     $description = $_POST['description'];
     $prix = floatval($_POST['prix']);
     $type_vente = $_POST['type_vente'];
 
+    // Mise à jour du produit en base de données
     $stmt = $bdd->prepare("UPDATE produits SET titre = ?, description = ?, prix = ?, type_vente = ? WHERE id = ? AND id_vendeur = ?");
     $stmt->execute([$titre, $description, $prix, $type_vente, $produit_id, $id_vendeur]);
 
+    // Redirection vers l'espace vendeur après modification
     header("Location: espace_vendeur.php");
     exit;
 }

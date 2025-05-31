@@ -1,7 +1,10 @@
 <?php 
+// Démarrage de la session utilisateur
 session_start();
+// Inclusion de la connexion PDO à la base de données
 require_once 'config/connexion.php';
 
+// Vérification de la présence de l'ID du produit dans l'URL
 if (!isset($_GET['id'])) {
     echo "Produit introuvable.";
     exit;
@@ -9,32 +12,36 @@ if (!isset($_GET['id'])) {
 
 $produit_id = intval($_GET['id']);
 
-// Récupérer les infos du produit
+// Récupération des informations du produit
 $stmt = $bdd->prepare("SELECT * FROM produits WHERE id = ?");
 $stmt->execute([$produit_id]);
 $produit = $stmt->fetch();
 
+// Vérification que le produit existe et qu'il s'agit bien d'une enchère
 if (!$produit || $produit['type_vente'] !== 'enchere') {
     echo "Ce produit n'est pas en vente aux enchères.";
     exit;
 }
 
-// Gérer la soumission d'une enchère
+// Gestion de la soumission d'une enchère par un utilisateur connecté
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['id'])) {
     $enchere = (float) ($_POST['montant'] ?? 0);
     $utilisateur_id = $_SESSION['id'];
 
-    // Récupérer la meilleure enchère précédente
+    // Récupération de la meilleure enchère précédente
     $stmt = $bdd->prepare("SELECT utilisateur_id, MAX(montant) as montant FROM encheres WHERE produit_id = ? GROUP BY utilisateur_id ORDER BY montant DESC LIMIT 1");
     $stmt->execute([$produit_id]);
     $ancienne_meilleure = $stmt->fetch();
 
+    // Calcul du montant minimum à proposer
     $montant_min = max($produit['prix'], $ancienne_meilleure['montant'] ?? 0) + 1;
 
+    // Si l'enchère est suffisante, on l'enregistre et on notifie
     if ($enchere >= $montant_min) {
         $stmt = $bdd->prepare("INSERT INTO encheres (produit_id, utilisateur_id, montant, date_enchere) VALUES (?, ?, ?, NOW())");
         $stmt->execute([$produit_id, $utilisateur_id, $enchere]);
 
+        // Notification pour le nouvel enchérisseur
         $stmt = $bdd->prepare("INSERT INTO notifications (utilisateur_id, message, produit_id, image_url) VALUES (?, ?, ?, ?)");
         $stmt->execute([
             $utilisateur_id,
@@ -43,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['id'])) {
             $produit['image'] ?? 'images/default.jpg'
         ]);
 
+        // Notification pour l'ancien meilleur enchérisseur (si différent)
         if (!empty($ancienne_meilleure) && $ancienne_meilleure['utilisateur_id'] != $utilisateur_id) {
             $stmt = $bdd->prepare("INSERT INTO notifications (utilisateur_id, message, produit_id, image_url) VALUES (?, ?, ?, ?)");
             $stmt->execute([
@@ -52,23 +60,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['id'])) {
                 $produit['image'] ?? 'images/default.jpg'
             ]);
         }
-
         $message = "Votre enchère a été enregistrée.";
     } else {
         $message = "Votre enchère doit être supérieure ou égale à $montant_min €.";
     }
 }
 
-// Enregistrement enchère automatique
+// Gestion de l'enchère automatique
 if (isset($_POST['auto_enchere']) && isset($_POST['max_auto']) && isset($_SESSION['id'])) {
     $max_auto = (float) $_POST['max_auto'];
     $utilisateur_id = $_SESSION['id'];
+    // Enregistrement ou mise à jour de l'enchère automatique
     $stmt = $bdd->prepare("REPLACE INTO enchere_auto (utilisateur_id, produit_id, montant_max) VALUES (?, ?, ?)");
     $stmt->execute([$utilisateur_id, $produit_id, $max_auto]);
     $message = "✅ Votre enchère automatique jusqu'à {$max_auto} € a été enregistrée.";
 }
 
-// Logique d'enchère automatique
+// Fonction pour vérifier et déclencher les enchères automatiques
 function verifierEncheresAutomatiques(PDO $bdd, $produit_id, $produit) {
     $stmt = $bdd->prepare("SELECT utilisateur_id, montant FROM encheres WHERE produit_id = ? ORDER BY montant DESC LIMIT 1");
     $stmt->execute([$produit_id]);
@@ -83,9 +91,11 @@ function verifierEncheresAutomatiques(PDO $bdd, $produit_id, $produit) {
     foreach ($autos as $auto) {
         if ($auto['utilisateur_id'] !== $last_user && $auto['montant_max'] > $last_montant) {
             $new_bid = $last_montant + 1;
+            // Déclenchement de l'auto-enchère
             $stmt = $bdd->prepare("INSERT INTO encheres (produit_id, utilisateur_id, montant, date_enchere) VALUES (?, ?, ?, NOW())");
             $stmt->execute([$produit_id, $auto['utilisateur_id'], $new_bid]);
 
+            // Notification pour l'utilisateur
             $stmt = $bdd->prepare("INSERT INTO notifications (utilisateur_id, message, produit_id, image_url) VALUES (?, ?, ?, ?)");
             $stmt->execute([
                 $auto['utilisateur_id'],
@@ -98,9 +108,10 @@ function verifierEncheresAutomatiques(PDO $bdd, $produit_id, $produit) {
     }
 }
 
+// Appel de la fonction pour gérer les enchères automatiques
 verifierEncheresAutomatiques($bdd, $produit_id, $produit);
 
-// Historique
+// Récupération de l'historique des enchères pour affichage
 $stmt = $bdd->prepare("SELECT e.montant, u.nom, e.date_enchere FROM encheres e JOIN utilisateurs u ON e.utilisateur_id = u.id WHERE e.produit_id = ? ORDER BY e.date_enchere DESC");
 $stmt->execute([$produit_id]);
 $historique = $stmt->fetchAll();

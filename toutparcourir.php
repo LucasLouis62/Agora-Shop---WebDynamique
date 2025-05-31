@@ -1,23 +1,32 @@
 <?php
+// Démarrage de la session utilisateur
 session_start();
+
+// Inclusion de la connexion PDO à la base de données
 require_once 'config/connexion.php';
 
+// Fonction Barre de recherche de produits par mot-clé (titre)
 function rechercherProduits($bdd, $motCle) {
     $stmt = $bdd->prepare("SELECT * FROM produits WHERE titre LIKE ?");
     $stmt->execute(['%' . $motCle . '%']);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+// Fonction pour récupérer les produits d'une catégorie donnée
 function getProduitsParCategorie($bdd, $categorie) {
     $stmt = $bdd->prepare("SELECT * FROM produits WHERE Catégorie = ?");
     $stmt->execute([$categorie]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+// Liste des catégories disponibles
 $categories = ['suv', 'berline', 'sportive'];
 $produitsParCategorie = [];
+
+// Récupère le mot-clé de recherche si présent
 $recherche = $_GET['q'] ?? null;
 
+// Si une recherche est effectuée, on affiche les résultats, sinon on affiche par catégorie
 if ($recherche) {
     $resultatsRecherche = rechercherProduits($bdd, $recherche);
 } else {
@@ -33,6 +42,7 @@ if ($recherche) {
     <meta charset="UTF-8">
     <title>Agora Francia – Tout Parcourir</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Styles pour affichage des annonces -->
     <style>
         body { background: #f8f9fa; }
         .carousel-container {
@@ -64,22 +74,15 @@ if ($recherche) {
         }
     </style>
 </head>
+
 <body>
-<div class="container my-4 p-4 bg-white shadow rounded">
-    <header class="text-center mb-4">
-        <img src="images/logo_agora.png" alt="Logo Agora Francia" width="200" class="img-fluid">
-    </header>
+    <!-- Logo et header -->
+    <?php include 'includes/header.php'; ?>
 
-    <nav class="navbar navbar-expand justify-content-center mb-4">
-        <div class="navbar-nav gap-2">
-            <a class="btn btn-primary" href="index.php">Accueil</a>
-            <a class="btn btn-primary" href="toutparcourir.php">Tout Parcourir</a>
-            <a class="btn btn-primary" href="notifications.php">Notifications</a>
-            <a class="btn btn-primary" href="panier.php">Panier</a>
-            <a class="btn btn-primary" href="votrecompte.php">Votre compte</a>
-        </div>
-    </nav>
+    <!-- Barre de navigation principale -->
+    <?php include 'includes/navigation.php'; ?>
 
+    <!-- Formulaire de recherche -->
     <form method="get" action="toutparcourir.php" class="mb-5">
         <div class="input-group">
             <input type="text" name="q" class="form-control" placeholder="Rechercher un véhicule..." value="<?= htmlspecialchars($recherche ?? '') ?>">
@@ -88,10 +91,14 @@ if ($recherche) {
     </form>
 
     <?php if ($recherche): ?>
+        <!-- Si recherche -> Affichage des résultats de recherche -->
         <h4 class="mb-4">Résultats pour « <?= htmlspecialchars($recherche) ?> »</h4>
         <?php if (empty($resultatsRecherche)): ?>
+            <!-- Si recherche vide -> Affichage aucun résultat -->
             <p>Aucun résultat trouvé.</p>
+
         <?php else: ?>
+            <!-- Affichage contour et boutons pour annonce si recherche effectué -->
             <div class="carousel-container mb-4">
                 <?php foreach ($resultatsRecherche as $produit): ?>
                     <div class="card shadow-sm">
@@ -102,7 +109,9 @@ if ($recherche) {
                             <h6 class="card-title text-truncate" style="max-width: 210px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0 auto;">
                                 <?= htmlspecialchars($produit['titre']) ?>
                             </h6>
-                            <p class="small"><?= htmlspecialchars($produit['description']) ?></p>
+                            <p class="small text-wrap" style="word-break:break-word; white-space:normal; max-width:220px; margin:0 auto;">
+                                <?= htmlspecialchars($produit['description']) ?>
+                            </p>
                             <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
                             <div class="d-grid gap-1">
                                 <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir</a>
@@ -118,13 +127,17 @@ if ($recherche) {
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
+
     <?php else: ?>
+        <!-- Affichage des produits par catégorie -->
         <h2 class="text-center text-primary mb-5">Tout Parcourir</h2>
         <?php foreach ($produitsParCategorie as $categorie => $produits): ?>
+            <!-- Affichage des différentes catégorie -->
             <h4 class="mb-3"><?= ucfirst($categorie) ?> 🚗 
                 <a href="parcourir-<?= $categorie ?>.php" class="btn btn-sm btn-outline-secondary ms-2">Voir tous</a>
             </h4>
             <div class="carousel-container mb-5">
+                <!-- Affichage des données de l'annonce -->
                 <?php foreach ($produits as $produit): ?>
                     <div class="card shadow-sm">
                         <a href="annonce.php?id=<?= $produit['id'] ?>">
@@ -134,18 +147,25 @@ if ($recherche) {
                             <h6 class="card-title text-truncate" style="max-width: 210px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin: 0 auto;">
                                 <?= htmlspecialchars($produit['titre']) ?>
                             </h6>
-                            <p class="small"><?= htmlspecialchars($produit['description']) ?></p>
+                            <p class="small text-wrap" style="word-break:break-word; white-space:normal; max-width:220px; margin:0 auto;">
+                                <?= htmlspecialchars($produit['description']) ?>
+                            </p>
                             <p class="text-muted"><?= number_format($produit['prix'], 0, ',', ' ') ?> €</p>
                             <div class="d-grid gap-1">
                                 <a href="annonce.php?id=<?= $produit['id'] ?>" class="btn btn-outline-primary btn-sm">Voir</a>
+                                <!-- Si pas une enchère -> afficher boutons Ajouter au panier -->
                                 <?php if ($produit['type_vente'] !== 'enchere'): ?>
                                     <a href="ajouter_au_panier.php?id=<?= $produit['id'] ?>" class="btn btn-outline-success btn-sm">Ajouter au panier</a>
                                 <?php endif; ?>
+                                <!-- Si Client/vendeur -> afficher boutons Faire une offre -->
                                 <?php if ($produit['type_vente'] === 'negociation'): ?>
                                     <a href="negociation.php?id=<?= $produit['id'] ?>" class="btn btn-outline-warning btn-sm">Faire une offre</a>
                                 <?php endif; ?>
+                                <!-- Si enchère -> afficher boutons Enchérir -->
                                 <?php if ($produit['type_vente'] === 'enchere'): ?>
+                                    <!-- Calcul du temps restant pour l'enchère -->
                                     <?php
+                                        // Calcul du temps restant pour l'enchère
                                         $temps_restant = '';
                                         if (!empty($produit['date_ajout'])) {
                                             $date_ajout = new DateTime($produit['date_ajout']);
@@ -161,9 +181,9 @@ if ($recherche) {
                                         }
                                     ?>
                                     <a href="enchere.php?id=<?= $produit['id'] ?>" class="btn btn-outline-danger btn-sm">Enchérir</a>
+                                    <!-- Affichage temps restant -->
                                     <p class="mt-2 mb-0 small text-secondary" style="white-space:normal; word-break:break-word;">Fermeture de l'enchère dans : <strong><?= $temps_restant ?></strong></p>
                                 <?php endif; ?>
-
                             </div>
                         </div>
                     </div>
@@ -172,21 +192,7 @@ if ($recherche) {
         <?php endforeach; ?>
     <?php endif; ?>
 
-    <footer class="row text-center text-md-start align-items-center mt-5">
-        <div class="col-md-4 mb-3 mb-md-0">
-            <h5>Contact</h5>
-            <p>Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
-            <p>Téléphone : 01 23 45 67 89</p>
-            <p>Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
-        </div>
-        <div class="col-md-4 mb-3 mb-md-0">
-            <p>&copy; 2025 Agora Francia</p>
-        </div>
-        <div class="col-md-4">
-            <h5>Nous trouver</h5>
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"></iframe>
-        </div>
-    </footer>
-</div>
+    <!-- Footer -->
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

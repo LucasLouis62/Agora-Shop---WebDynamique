@@ -1,9 +1,12 @@
 <?php
+// Démarrage de la session utilisateur
 session_start();
+// Inclusion de la connexion PDO à la base de données
 require_once 'config/connexion.php';
 
-// Vérifier si le formulaire a été soumis
+// Vérifie si le formulaire d'ajout de produit a été soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Récupération des champs du formulaire
     $titre = $_POST['titre'];
     $description = $_POST['description'];
     $prix = $_POST['prix'];
@@ -11,20 +14,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $type_vente = $_POST['type_vente'];
     $date_fin_enchere = !empty($_POST['date_fin_enchere']) ? $_POST['date_fin_enchere'] : null;
 
-    // Gestion image
+    // Gestion de l'upload de l'image
     $imagePath = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $imageName = basename($_FILES['image']['name']);
         $targetPath = "images/" . $imageName;
+        // Déplace le fichier uploadé dans le dossier images
         if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
             $imagePath = $targetPath;
         }
     }
 
-    // Insertion du produit
+    // Insertion du produit dans la base de données
     $stmt = $bdd->prepare("INSERT INTO produits (titre, description, prix, Catégorie, image, type_vente, date_fin_enchere) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([$titre, $description, $prix, $categorie, $imagePath, $type_vente, $date_fin_enchere]);
 
+    // Message de confirmation
     $message = "Produit ajouté avec succès !";
 }
 ?>

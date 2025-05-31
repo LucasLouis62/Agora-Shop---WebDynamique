@@ -77,6 +77,25 @@ if ($db_found) {
         $data_p = mysqli_fetch_assoc($result_p);
     }
 }
+
+// Traitement des critères de recherche
+if (isset($_POST['sauvegarder_criteres']) && isset($_SESSION['id'])) {
+    $utilisateur_id = $_SESSION['id'];
+    $mot_cle = isset($_POST['mot_cle']) ? trim($_POST['mot_cle']) : '';
+    $prix_max = isset($_POST['prix_max']) ? floatval($_POST['prix_max']) : 0;
+    $categorie = isset($_POST['categorie']) ? trim($_POST['categorie']) : '';
+
+    $mot_cle_sql = mysqli_real_escape_string($db_handle, $mot_cle);
+    $categorie_sql = mysqli_real_escape_string($db_handle, $categorie);
+    $sql = "INSERT INTO criteres_recherche (utilisateur_id, mot_cle, prix_max, categorie)
+            VALUES ($utilisateur_id, '$mot_cle_sql', $prix_max, '$categorie_sql')
+            ON DUPLICATE KEY UPDATE mot_cle = VALUES(mot_cle), prix_max = VALUES(prix_max), categorie = VALUES(categorie)";
+    if (mysqli_query($db_handle, $sql)) {
+        $message_criteres = "<div class='alert alert-success text-center mt-3'>Critères enregistrés avec succès !</div>";
+    } else {
+        $message_criteres = "<div class='alert alert-danger text-center mt-3'>Erreur lors de l'enregistrement des critères.</div>";
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -112,20 +131,11 @@ if ($db_found) {
     </script>
 </head>
 <body>
-<div class="container my-4 p-4 bg-white shadow rounded">
-    <header class="text-center mb-4">
-        <img src="images/logo_agora.png" alt="Logo Agora Francia" width="200" class="img-fluid">
-    </header>
+    <!-- Logo -->
+    <?php include 'includes/header.php'; ?>
 
-    <nav class="navbar navbar-expand justify-content-center mb-4">
-        <div class="navbar-nav gap-2">
-            <a class="btn btn-primary" href="index.php">Accueil</a>
-            <a class="btn btn-primary" href="toutparcourir.php">Tout Parcourir</a>
-            <a class="btn btn-primary" href="notifications.php">Notifications</a>
-            <a class="btn btn-primary" href="panier.php">Panier</a>
-            <a class="btn btn-primary" href="<?= isset($_SESSION['id']) ? 'compte.php' : 'votrecompte.php' ?>">Votre compte</a>
-        </div>
-    </nav>
+    <!-- Barre de navigation -->
+    <?php include 'includes/navigation.php'; ?>
 
     <div class="container py-3">
         <!-- Encadré 1 : Infos personnelles -->
@@ -138,6 +148,7 @@ if ($db_found) {
                 <li class="list-group-item"><strong>Rôle :</strong> <?= htmlspecialchars($_SESSION['role']) ?></li>
             </ul>
         </div>
+
         <!-- Encadré 2 : Infos bancaires -->
         <div class="card mx-auto p-4" style="max-width: 500px;">
             <div class="section-title">Informations bancaires</div>
@@ -182,6 +193,7 @@ if ($db_found) {
                 <button type="submit" name="save_bancaire" class="btn btn-success w-100">Enregistrer</button>
             </form>
         </div>
+
         <!-- Encadré 3 : Infos postales -->
         <div class="card mx-auto p-4" style="max-width: 500px;">
             <div class="section-title">Informations postales</div>
@@ -232,6 +244,36 @@ if ($db_found) {
                 <button type="submit" name="save_postal" class="btn btn-success w-100">Enregistrer</button>
             </form>
         </div>
+        <?= $message_criteres ?>
+
+        <!-- Encadré 4 : Critères de recherche -->
+        <div class="card shadow mt-5 p-4">
+            <h4 class="mb-3 text-center text-primary">🔎 Sauvegarder vos critères de recherche</h4>
+            <form action="espace_acheteur.php" method="post">
+                <div class="mb-3">
+                    <label for="mot_cle" class="form-label">Mot-clé (ex : SUV, Tesla, électrique)</label>
+                    <input type="text" name="mot_cle" id="mot_cle" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="prix_max" class="form-label">Prix maximum (€)</label>
+                    <input type="number" name="prix_max" id="prix_max" class="form-control" min="1" step="1">
+                </div>
+                <div class="mb-3">
+                    <label for="categorie" class="form-label">Catégorie</label>
+                    <select name="categorie" id="categorie" class="form-control" required>
+                        <option value="">-- Choisir --</option>
+                        <option value="suv">SUV</option>
+                        <option value="berline">Berline</option>
+                        <option value="sportive">Sportive</option>
+                    </select>
+                </div>
+                <button type="submit" name="sauvegarder_criteres" class="btn btn-outline-success w-100">
+                    Enregistrer les critères
+                </button>
+            </form>
+        </div>
+
+        <!-- Encadré 5 : Déconnexio et retour menu -->
         <div class="card mx-auto p-3" style="max-width: 500px;">
             <div class="d-flex justify-content-between">
                 <a href="index.php" class="btn btn-outline-primary btn-custom">🏠 Retour à l'accueil</a>
@@ -240,21 +282,7 @@ if ($db_found) {
         </div>
     </div>
 
-    <footer class="row text-center text-md-start align-items-center mt-5">
-        <div class="col-md-4 mb-3 mb-md-0">
-            <h5>Contact</h5>
-            <p>Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
-            <p>Téléphone : 01 23 45 67 89</p>
-            <p>Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
-        </div>
-        <div class="col-md-4 mb-3 mb-md-0">
-            <p>&copy; 2025 Agora Francia</p>
-        </div>
-        <div class="col-md-4">
-            <h5>Nous trouver</h5>
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" width="220" height="120" style="border:0; border-radius:8px;"></iframe>
-        </div>
-    </footer>
-</div>
+    <!-- Footer -->
+        <?php include 'includes/footer.php'; ?>
 </body>
 </html>

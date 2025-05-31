@@ -1,4 +1,5 @@
 <?php
+// Démarrage de la session utilisateur
 session_start();
 
 // Initialiser le panier s’il n’existe pas encore
@@ -27,97 +28,86 @@ $total = 0;
     <link rel="stylesheet" href="styles/prime.css">
 </head>
 <body>
-<div class="container my-4 p-4 border rounded shadow" style="background:#fff;">
-    <header class="text-center mb-4">
-        <img src="images/logo_agora.png" alt="Logo Agora Francia" width="200" class="img-fluid">
-    </header>
+    <!-- Logo -->
+    <?php include 'includes/header.php'; ?>
 
-    <nav class="navbar navbar-expand justify-content-center mb-4">
-        <div class="navbar-nav gap-2">
-            <a class="btn btn-primary" href="index.php">Accueil</a>
-            <a class="btn btn-primary" href="toutparcourir.php">Tout Parcourir</a>
-            <a class="btn btn-primary" href="notifications.php">Notifications</a>
-            <a class="btn btn-primary" href="panier.php">Panier</a>
-            <a class="btn btn-primary" href="votrecompte.php">Votre compte</a>
-        </div>
-    </nav>
+    <!-- Barre de navigation -->
+    <?php include 'includes/navigation.php'; ?>
 
     <main>
-        <h2 class="text-center mb-4">Votre Panier</h2>
+    <!-- Titre principal du panier -->
+    <h2 class="text-center mb-4">Votre Panier</h2>
 
-        <?php if (isset($_SESSION['message_panier'])): ?>
-            <div class="alert alert-success text-center">
-                <?= htmlspecialchars($_SESSION['message_panier']) ?>
-            </div>
-            <?php unset($_SESSION['message_panier']); ?>
-        <?php endif; ?>
-
-        <?php if (empty($panier)): ?>
-            <div class="alert alert-info text-center">Votre panier est vide.</div>
-        <?php else: ?>
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Photo</th>
-                            <th>Article</th>
-                            <th>Description</th>
-                            <th>Quantité</th>
-                            <th>Prix unitaire</th>
-                            <th>Total</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($panier as $article): 
-                            $id = $article['id'] ?? 0;
-                            $nom = htmlspecialchars($article['nom'] ?? 'Nom inconnu');
-                            $description = htmlspecialchars($article['description'] ?? 'Pas de description');
-                            $image = htmlspecialchars($article['image'] ?? 'images/default.jpg');
-                            $quantite = $article['quantite'] ?? 1;
-                            $prix = $article['prix'] ?? 0;
-                            $sous_total = $prix * $quantite;
-                            $total += $sous_total;
-                        ?>
-                        <tr>
-                            <td><img src="<?= $image ?>" alt="Photo" width="100" class="img-thumbnail"></td>
-                            <td><?= $nom ?></td>
-                            <td><?= $description ?></td>
-                            <td><?= $quantite ?></td>
-                            <td><?= $prix ?> €</td>
-                            <td><?= $sous_total ?> €</td>
-                            <td>
-                                <a href="?supprimer=<?= $id ?>" class="btn btn-outline-danger btn-sm">Supprimer</a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-            <div class="d-flex justify-content-between align-items-center mt-3 flex-column flex-md-row">
-                <p class="mb-2 mb-md-0"><strong>Total :</strong> <?= $total ?> €</p>
-                <a href="paiement.php" class="btn btn-success">Procéder au paiement</a>
-            </div>
-        <?php endif; ?>
-    </main>
-
-    <footer class="mt-4">
-        <div class="row text-center text-md-start align-items-center">
-            <div class="col-md-4 mb-3 mb-md-0">
-                <h5>Contact</h5>
-                <p class="mb-1">Email : <a href="mailto:agora.francia@gmail.com">agora.francia@gmail.com</a></p>
-                <p class="mb-1">Téléphone : 01 23 45 67 89</p>
-                <p class="mb-0">Adresse : 10 Rue Sextius Michel, 75015 Paris</p>
-            </div>
-            <div class="col-md-4 mb-3 mb-md-0">
-                <p class="mb-0">&copy; 2025 Agora Francia</p>
-            </div>
-            <div class="col-md-4">
-                <h5>Nous trouver</h5>
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2624.8878757609433!2d2.2847854156752096!3d48.850725779286154!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6701b486bb253%3A0x61e9cc6979f93fae!2s10%20Rue%20Sextius%20Michel%2C%2075015%20Paris!5e0!3m2!1sfr!2sfr!4v1685534176532!5m2!1sfr!2sfr" width="220" height="120" style="border:0; border-radius:8px;" allowfullscreen="" loading="lazy"></iframe>
-            </div>
+    <!-- Affichage d'un message de succès si une action sur le panier a eu lieu (ex : ajout ou suppression) -->
+    <?php if (isset($_SESSION['message_panier'])): ?>
+        <div class="alert alert-success text-center">
+            <?= htmlspecialchars($_SESSION['message_panier']) ?>
         </div>
-    </footer>
-</div>
+        <?php unset($_SESSION['message_panier']); ?>
+    <?php endif; ?>
+
+    <!-- Si le panier est vide, afficher un message d'information -->
+    <?php if (empty($panier)): ?>
+        <div class="alert alert-info text-center">Votre panier est vide.</div>
+    <?php else: ?>
+        <!-- Sinon, afficher le contenu du panier sous forme de tableau -->
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Photo</th>
+                        <th>Article</th>
+                        <th>Description</th>
+                        <th>Quantité</th>
+                        <th>Prix unitaire</th>
+                        <th>Total</th>
+                        <th></th> <!-- Colonne pour le bouton de suppression -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Parcours de chaque article du panier pour affichage -->
+                    <?php foreach ($panier as $article): 
+                        $id = $article['id'] ?? 0;
+                        $nom = htmlspecialchars($article['nom'] ?? 'Nom inconnu');
+                        $description = htmlspecialchars($article['description'] ?? 'Pas de description');
+                        $image = htmlspecialchars($article['image'] ?? 'images/default.jpg');
+                        $quantite = $article['quantite'] ?? 1;
+                        $prix = $article['prix'] ?? 0;
+                        $sous_total = $prix * $quantite;
+                        $total += $sous_total;
+                    ?>
+                    <tr>
+                        <!-- Affichage de la photo de l'article -->
+                        <td><img src="<?= $image ?>" alt="Photo" width="100" class="img-thumbnail"></td>
+                        <!-- Nom de l'article -->
+                        <td><?= $nom ?></td>
+                        <!-- Description de l'article -->
+                        <td><?= $description ?></td>
+                        <!-- Quantité sélectionnée -->
+                        <td><?= $quantite ?></td>
+                        <!-- Prix unitaire -->
+                        <td><?= $prix ?> €</td>
+                        <!-- Total pour cet article (prix * quantité) -->
+                        <td><?= $sous_total ?> €</td>
+                        <!-- Bouton pour supprimer l'article du panier -->
+                        <td>
+                            <a href="?supprimer=<?= $id ?>" class="btn btn-outline-danger btn-sm">Supprimer</a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Affichage du total général et du bouton de paiement -->
+        <div class="d-flex justify-content-between align-items-center mt-3 flex-column flex-md-row">
+            <p class="mb-2 mb-md-0"><strong>Total :</strong> <?= $total ?> €</p>
+            <a href="paiement.php" class="btn btn-success">Procéder au paiement</a>
+        </div>
+    <?php endif; ?>
+</main>
+
+    <!-- Footer -->
+    <?php include 'includes/footer.php'; ?>
 </body>
 </html>

@@ -1,19 +1,22 @@
 <?php
+// Démarrage de la session utilisateur
 session_start();
 
-// Simulation de deux modes de paiement
+// Récupération du mode de paiement sélectionné (si posté)
 $mode_paiement = $_POST['mode_paiement'] ?? '';
 
-// Données préremplies si utilisateur connecté
+// Initialisation des variables pour préremplir le formulaire
 $nom = $adresse = $carte = $expiration = $cvv = '';
 $message_paiement = '';
 
+// Si l'utilisateur est connecté, récupération de ses infos postales et bancaires
 if (isset($_SESSION['id'])) {
     $id = intval($_SESSION['id']);
     $db_handle = mysqli_connect('localhost', 'root', '');
     $db_found = mysqli_select_db($db_handle, 'agora');
 
     if ($db_found) {
+        // Récupération des infos postales
         $sql_p = "SELECT * FROM data_p WHERE id = $id LIMIT 1";
         $res_p = mysqli_query($db_handle, $sql_p);
         if ($res_p && mysqli_num_rows($res_p) > 0) {
@@ -22,6 +25,7 @@ if (isset($_SESSION['id'])) {
             $adresse = $data_p['adresse'];
         }
 
+        // Récupération des infos bancaires
         $sql_b = "SELECT * FROM data_b WHERE id = $id LIMIT 1";
         $res_b = mysqli_query($db_handle, $sql_b);
         if ($res_b && mysqli_num_rows($res_b) > 0) {
@@ -31,15 +35,15 @@ if (isset($_SESSION['id'])) {
             $cvv = $data_b['cvv'];
         }
 
-        // Traitement du paiement
+        // Traitement du paiement lors de la soumission du formulaire
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Simulation email de livraison (bonus)
+            // Simulation d'envoi d'email de confirmation de livraison (bonus)
             $to = 'utilisateur@example.com';
             $sujet = "Confirmation de livraison - Agora Francia";
             $message = "Merci pour votre commande ! Livraison estimée sous 3 à 5 jours ouvrés.";
             @mail($to, $sujet, $message);
 
-            // Suppression des articles du panier
+            // Suppression des articles du panier (et de la BDD)
             if (!empty($_SESSION['panier'])) {
                 foreach ($_SESSION['panier'] as $article) {
                     $prod_id = intval($article['id'] ?? 0);
@@ -48,12 +52,15 @@ if (isset($_SESSION['id'])) {
                     }
                 }
             }
+            // Suppression du panier de la session
             unset($_SESSION['panier']);
+            // Message de confirmation de paiement
             $message_paiement = '<div class="alert alert-success text-center">Merci pour votre commande ! Paiement par ' . htmlspecialchars($mode_paiement) . ' effectué.</div>';
         }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -72,6 +79,7 @@ if (isset($_SESSION['id'])) {
     }
   </style>
 </head>
+
 <body>
   <div class="container py-5">
     <div class="text-center mb-4">
